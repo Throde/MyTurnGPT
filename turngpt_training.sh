@@ -9,6 +9,7 @@ $ -l h_vmem=1G
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
+-P lel_hcrc_cstr_students
 # Email information
 -M s2125085@ed.ac.uk
 -m beas
