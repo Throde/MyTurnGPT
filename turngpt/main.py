@@ -1,6 +1,10 @@
 from argparse import ArgumentParser
 from os.path import join
 from os import environ
+# avoid python creating too many threads causing thread-overflow errors:
+# > OpenBLAS blas_thread_init: pthread_create failed for thread 3 of 32: Resource temporarily unavailable
+# > OpenBLAS blas_thread_init: RLIMIT_NPROC 200 current, 200 max
+environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import torch
 import pytorch_lightning as pl
