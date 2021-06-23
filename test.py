@@ -1,0 +1,3 @@
+import ttd
+
+print("OK")
