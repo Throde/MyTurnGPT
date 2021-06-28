@@ -1,4 +1,5 @@
 from argparse import ArgumentParser
+# tqdm: a progress bar printer
 from tqdm import tqdm
 
 import torch
@@ -8,7 +9,7 @@ import pytorch_lightning as pl
 
 class TurnGPT(pl.LightningModule):
     def forward(self, input_ids, speaker_ids, **kwargs):
-        """ labels are the the same as input_ids shift and padding fix inside model"""
+        """ labels are the same as input_ids shift and padding fix inside model"""
         return self.model(input_ids, speaker_ids=speaker_ids, **kwargs)
 
     @torch.no_grad()
@@ -26,7 +27,7 @@ class TurnGPT(pl.LightningModule):
         stop_at_turn_shift=True,
         use_pbar=False,
     ):
-        """heavily basged on minGPT/utils in https://github.com/karpathy/minGPT """
+        """heavily based on minGPT/utils in https://github.com/karpathy/minGPT """
 
         # collect samples and remove from processing when reaching a speaker token
         if stop_at_turn_shift:
