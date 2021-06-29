@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import math
 import torch
-from tqdm import tqdm
+from tqdm import tqdm   # progress printer
 from os.path import split, join
 from os import makedirs
 
@@ -47,7 +47,10 @@ def load():
         type=str,
         default="train",  # val, test
     )
-    temp_args, _ = parser.parse_known_args()
+    # DH: parse_known_args() 
+    # temp_args= parser with keys already added using add_argument so far;
+    # _= list of keys that given in the cmd (python eval --key) but not yet added by add_argument, will be stored and added later when add_argument is used
+    temp_args, _ = parser.parse_known_args()    
 
     # Add all datasets
     datasets = temp_args.datasets
@@ -104,7 +107,7 @@ class TurnGPTEval(pl.LightningModule):
 
     def trp(self, input_ids, speaker_ids, output_attentions=False):
         out = self.model(
-            input_ids, speaker_ids=speaker_ids, output_attentions=output_attentions
+            input_ids, speaker_ids=speaker_ids#, output_attentions=output_attentions
         )
         logits = out["logits"]
         prob = F.softmax(logits, dim=-1)
