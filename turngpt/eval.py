@@ -461,7 +461,7 @@ class TurnGPTEval(pl.LightningModule):
             error_perc = abs(round(diff * 100 / score_diff, 3))
 
         if use_pbar:
-            print(f"Error: {error_perc}%")
+            print("Error: ",error_perc,"%")
             if error_perc >= 5:
                 print("Error is larger than 5%. Increase 'm'...")
         return {
