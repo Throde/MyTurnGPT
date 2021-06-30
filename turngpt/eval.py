@@ -879,6 +879,10 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         evaluation_model = evaluation_model.to("cuda")
 
+    # DH:
+    print(">> Model, data ok")
+    input(">> [1] Press any key to continue")
+
     chkpt_root = split(args.tokenizer)[0]
     savepath = join(chkpt_root, "evaluation")
     makedirs(savepath, exist_ok=True)
