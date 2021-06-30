@@ -146,7 +146,7 @@ class TurnGPTDM(pl.LightningDataModule):
         return DataLoader(
             self.test_dset,
             batch_size=self.hparams["batch_size"],
-            num_workers=self.hparams["num_workers"],
+            num_workers=1,#self.hparams["num_workers"],
             collate_fn=collate_fn_wrapper(self.pad_idx),
             pin_memory=True,
         )

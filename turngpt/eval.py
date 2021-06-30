@@ -958,10 +958,15 @@ if __name__ == "__main__":
         n_samples = 1000
         horizon = 41
         batch_size = 40
+        # turns = [
+        #     " yesterday we met in the park",
+        #     " okay when will you meet again",
+        #     " tomorrow",
+        #     "",
+        # ]
         turns = [
-            " yesterday we met in the park",
-            " okay when will you meet again",
-            " tomorrow",
+            " yesterday i met him in the park",
+            " he is so excited",
             "",
         ]
         input_ids, speaker_ids = turns_to_turngpt_tensors(
@@ -1004,5 +1009,5 @@ if __name__ == "__main__":
 
     #ans = input("end?")
     # DH:
-    print(">> Context IG work done; End?")
+    print(">> Context IG work done; end?")
     input(">> [6/6] Press any key to continue")
