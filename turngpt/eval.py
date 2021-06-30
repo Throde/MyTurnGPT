@@ -91,7 +91,7 @@ def get_dataloader(dm, args):
     else:  # all
         dm.test_dset.filepaths += dm.train_dset.filepaths
         dm.test_dset.filepaths += dm.val_dset.filepaths
-    return dm.test_dataloader()
+    return dm.test_dataloader() # DH: torch.utils.data.DataLoader Object
 
 
 class TurnGPTEval(pl.LightningModule):
@@ -879,15 +879,14 @@ if __name__ == "__main__":
     if torch.cuda.is_available():
         evaluation_model = evaluation_model.to("cuda")
 
-    # DH:
-    print(">> Model, data ok")
-    input(">> [1] Press any key to continue")
-
     chkpt_root = split(args.tokenizer)[0]
     savepath = join(chkpt_root, "evaluation")
     makedirs(savepath, exist_ok=True)
 
     test_dataloader = get_dataloader(dm, args)
+    # DH:
+    print(">> Model, data ok; savepath:", savepath)
+    input(">> [1/6] Press any key to continue")
 
     if args.perplexity:
         # ce_loss, ppl = perplexity(model, dm, args)
@@ -895,19 +894,23 @@ if __name__ == "__main__":
         print("split: ", args.split)
         print("avg CE loss: ", ce_loss)
         print("ppl (nats): ", ppl)
-        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))
+        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))   # perp save path
 
     if args.classification:
         score = evaluation_model.classification(test_dataloader)
         fig, ax = Plots.bacc(score, plot=args.plot)
         fig.savefig(join(savepath, f"bacc_{args.datasets}_{args.split}.png"))
-        torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))
+        torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))  # classif save path
         pgm = score["positive_guesses"].mean()
         pgs = score["positive_guesses"].std()
         ngm = score["negative_guesses"].mean()
         ngs = score["negative_guesses"].std()
         print("Pos: ", pgm, pgs)
         print("Pos: ", ngm, ngs)
+    
+    # DH:
+    print(">> Perplexity and classification work done")
+    input(">> [2/6] Press any key to continue")
 
     n_context = 4
 
@@ -928,8 +931,12 @@ if __name__ == "__main__":
             thresh_score.append(score["bacc"][i])
 
         fig, ax = Plots.context_ablation(thresh_score, plot=args.plot)
-        fig.savefig(join(savepath, f"abl_{args.datasets}_{args.split}.png"))
-        torch.save(predictions, join(savepath, f"abl_{args.datasets}_{args.split}.pt"))
+        fig.savefig(join(savepath, f"abl_{args.datasets}_{args.split}.png"))    # diagram save path
+        torch.save(predictions, join(savepath, f"abl_{args.datasets}_{args.split}.pt")) # pt save path
+
+    # DH:
+    print(">> Context ablation work done")
+    input(">> [3/6] Press any key to continue")
 
     prob_thresh = 0.2
     if args.context_attention:
@@ -937,11 +944,15 @@ if __name__ == "__main__":
             test_dataloader, prob_thresh, n_context
         )
         fig, ax = Plots.context_attention(context_attention_score, plot=args.plot)
-        fig.savefig(join(savepath, f"att_{args.datasets}_{args.split}.png"))
+        fig.savefig(join(savepath, f"att_{args.datasets}_{args.split}.png"))    # png save path
         torch.save(
             context_attention_score,
-            join(savepath, f"att_{args.datasets}_{args.split}.pt"),
+            join(savepath, f"att_{args.datasets}_{args.split}.pt"), # pt save path
         )
+
+    # DH:
+    print(">> Context attention work done")
+    input(">> [4/6] Press any key to continue")
 
     if args.prediction_hist:
         n_samples = 1000
@@ -972,7 +983,11 @@ if __name__ == "__main__":
             horizon=horizon,
             plot=args.plot,
         )
-        fig.savefig(join(savepath, f"pred_hist.png"))
+        fig.savefig(join(savepath, f"pred_hist.png"))   # png save path
+
+    # DH:
+    print(">> Prediction hist work done")
+    input(">> [5/6] Press any key to continue")
 
     if args.context_ig:
         context_ig = evaluation_model.context_IG(
@@ -981,10 +996,13 @@ if __name__ == "__main__":
         fig, ax = Plots.context_attention(
             context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
         )
-        fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png"))
+        fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png")) # png save path
         torch.save(
             context_ig,
-            join(savepath, f"ig_{args.datasets}_{args.split}.pt"),
+            join(savepath, f"ig_{args.datasets}_{args.split}.pt"),  # pt save path
         )
 
-    ans = input("end?")
+    #ans = input("end?")
+    # DH:
+    print(">> Context IG work done; End?")
+    input(">> [6/6] Press any key to continue")
