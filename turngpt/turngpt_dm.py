@@ -102,7 +102,12 @@ class TurnGPTDM(pl.LightningDataModule):
             self.train_filepaths = []
             self.val_filepaths = []
 
+            # DH breakpoint
+            print(">> self.builders: ", self.builders)
             for builder in self.builders:
+                print(">> builder: ", builder)
+                print(builder.train_filepaths)
+                print(builder.val_filepaths)
                 for json_name in builder.train_filepaths:
                     self.train_filepaths.append(join(builder.task_path, json_name))
 
@@ -112,15 +117,11 @@ class TurnGPTDM(pl.LightningDataModule):
             # DH breakpoint
             print(">>", self.train_filepaths)
             print(">>", self.val_filepaths)
+            input(">> Press any key to continue")
 
             self.train_dset = JsonDataset(self.train_filepaths)
             self.val_dset = JsonDataset(self.val_filepaths)
             self.dummy_input = None
-
-            # DH breakpoint
-            print(">>", self.train_dset)
-            print(">>", self.val_dset)
-            input(">> Press any key to continue")
 
         # Assign Test split(s) for use in Dataloaders
         if stage == "test" or stage is None:
