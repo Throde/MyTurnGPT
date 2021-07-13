@@ -151,7 +151,7 @@ class TurnGPTDM(pl.LightningDataModule):
         return DataLoader(
             self.test_dset,
             batch_size=self.hparams["batch_size"],
-            num_workers=1,#self.hparams["num_workers"],
+            num_workers=self.hparams["num_workers"],
             collate_fn=collate_fn_wrapper(self.pad_idx),
             pin_memory=True,
         )
@@ -171,7 +171,7 @@ class TurnGPTDM(pl.LightningDataModule):
         parser.add_argument("--chunk_keep_length", type=int, default=20)
 
         parser.add_argument("--batch_size", type=int, default=4)
-        parser.add_argument("--num_workers", type=int, default=4)
+        parser.add_argument("--num_workers", type=int, default=1)#4)
         return parser
 
 
