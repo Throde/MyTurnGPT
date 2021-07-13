@@ -25,6 +25,7 @@
 # Load Python
 # module load python/3.8  # 3.4.3
 module load anaconda
+module list
 source activate slptorch
 
 # Run the program

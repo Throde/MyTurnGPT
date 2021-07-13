@@ -23,7 +23,7 @@
 . /etc/profile.d/modules.sh
 
 # Load Python
-module load python/3.8  # 3.4.3
+#module load python/3.8  # 3.4.3
 module load anaconda
 source activate slptorch
 
