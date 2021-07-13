@@ -70,7 +70,7 @@ def main(args):
 
     # DH: data config and callbacks ok. Wait to progress.
     print(">> Data and callbacks configuration ok, continue to prepare data and initialise model...")
-    input(">> [2/3] Press any key to progress.")
+    input(">> [1/2] Press any key to progress.")
 
     # ------------------------------------------------------------------
     # Trainer
@@ -132,7 +132,7 @@ def main(args):
 
     # DH: data and model preparation ok. Wait to progress.
     print(">> Data and model preparation ok, continue to model training...")
-    input(">> [3/3] Press any key to progress.")
+    input(">> [2/2] Press any key to progress.")
 
     # ------------------------------------------------------------------
     # Fit
@@ -200,9 +200,5 @@ if __name__ == "__main__":
     args.save_dir = get_run_dir(__file__)
     print(args.save_dir)
     print()
-
-    # DH: print args and wait for cmd to progress
-    print(">> ", args)
-    input(">> [1/3] Press any key to progress.")
 
     main(args)
