@@ -894,7 +894,7 @@ if __name__ == "__main__":
         print("split: ", args.split)
         print("avg CE loss: ", ce_loss)
         print("ppl (nats): ", ppl)
-        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))   # perp save path
+        write_txt(["ce_loss: "+str(ce_loss), "ppl: "+str(ppl)], join(savepath, "loss.txt"))   # perp save path
 
     if args.classification:
         score = evaluation_model.classification(test_dataloader)
