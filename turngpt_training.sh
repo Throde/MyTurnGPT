@@ -1,20 +1,21 @@
 #!/bin/sh
 # Grid Engine options (lines prefixed with #$)
-$ -N turngpt_traning              
-$ -cwd /exports/chss/eddie/ppls/groups/lel_hcrc_cstr_students/s2125085_Daohuan_Liu/MyTurnGPT
-$ -o /home/s2125085/turngpt_job/output
-$ -e /home/s2125085/turngpt_job/error
-$ -l h_rt=00:25:00 
-$ -l h_vmem=1G
-#  These options are:
+
 #  job name: -N
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
--P lel_hcrc_cstr_students
+#$ -N turngpt             
+#$ -cwd
+#$ -l h_rt=48:00:00 
+#$ -l h_vmem=32G
+
+# priority
+#$ -P lel_hcrc_cstr_students
+
 # Email information
--M s2125085@ed.ac.uk
--m beas
+#$ -M s2125085@ed.ac.uk
+#$ -m beas
 
 # Initialise the environment modules
 . /etc/profile.d/modules.sh
