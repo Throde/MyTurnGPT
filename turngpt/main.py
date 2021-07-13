@@ -41,7 +41,7 @@ def main(args):
         print("Logging -> ", args.save_dir)
 
         name = "TurnGPT" + args.model
-        desc = f"{name} training"
+        desc = str(name)+" training"
         logger = TensorBoardLogger(args.save_dir, name=name)
         ch_path = join(logger.log_dir, "checkpoints")
         checkpoint_callback = ModelCheckpoint(
