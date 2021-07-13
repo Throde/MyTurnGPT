@@ -1,6 +1,6 @@
 #!/bin/sh
 # Grid Engine options (lines prefixed with #$)
-$ -N turngpt_traning              
+$ -N turngpt             
 $ -cwd /exports/chss/eddie/ppls/groups/lel_hcrc_cstr_students/s2125085_Daohuan_Liu/MyTurnGPT
 $ -o /home/s2125085/turngpt_job/output
 $ -e /home/s2125085/turngpt_job/error
