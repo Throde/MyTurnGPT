@@ -33,7 +33,7 @@ source activate slptorch
 # python hello.py
 python ./turngpt/main.py \
   --model mini \
-  --datasets maptask \
+  --datasets maptask switchboard\
   --chunk_size 512 \
   --gpus 1 \
   --batch_size 2 \
