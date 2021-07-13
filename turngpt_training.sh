@@ -27,7 +27,7 @@ module load python/3.8  # 3.4.3
 # python hello.py
 python ./turngpt/main.py \
   --model pretrained \
-  --datasets maptask \
+  --datasets maptask switchboard \
   --chunk_size 512 \
   --gpus 1 \
   --batch_size 2 \
