@@ -5,7 +5,7 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N turngpt             
+#$ -N job_test             
 #$ -cwd
 #$ -o job_test_out.log
 #$ -e job_test_err.log
