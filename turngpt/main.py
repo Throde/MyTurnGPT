@@ -70,7 +70,7 @@ def main(args):
 
     # DH: data config and callbacks ok. Wait to progress.
     print(">> Data and callbacks configuration ok, continue to prepare data and initialise model...")
-    input(">> [1/2] Press any key to progress.")
+    #input(">> [1/2] Press any key to progress.")
 
     # ------------------------------------------------------------------
     # Trainer
@@ -132,7 +132,7 @@ def main(args):
 
     # DH: data and model preparation ok. Wait to progress.
     print(">> Data and model preparation ok, continue to model training...")
-    input(">> [2/2] Press any key to progress.")
+    #input(">> [2/2] Press any key to progress.")
 
     # ------------------------------------------------------------------
     # Fit
