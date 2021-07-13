@@ -10,6 +10,7 @@
 #$ -o turngpt_out.log
 #$ -e turngpt_err.log
 #$ -l h_rt=48:00:00 
+#$ -pe gpu 1
 #$ -l h_vmem=32G
 
 # priority
