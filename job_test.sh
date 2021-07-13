@@ -10,7 +10,7 @@
 #$ -o job_test_out.log
 #$ -e job_test_err.log
 #$ -l h_rt=00:30:00 
-#$ -l h_vmem=1G
+#$ -l h_vmem=32G
 
 # priority
 #$ -P lel_hcrc_cstr_students
