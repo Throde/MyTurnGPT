@@ -114,11 +114,6 @@ class TurnGPTDM(pl.LightningDataModule):
                 for json_name in builder.val_filepaths:
                     self.val_filepaths.append(join(builder.task_path, json_name))
 
-            # DH breakpoint
-            #print(">>", self.train_filepaths)
-            #print(">>", self.val_filepaths)
-            input(">> Press any key to continue")
-
             self.train_dset = JsonDataset(self.train_filepaths)
             self.val_dset = JsonDataset(self.val_filepaths)
             self.dummy_input = None
