@@ -7,6 +7,8 @@
 #  memory limit of 1 Gbyte: -l h_vmem
 #$ -N turngpt             
 #$ -cwd
+#$ -o turngpt_out.log
+#$ -e turngpt_err.log
 #$ -l h_rt=48:00:00 
 #$ -l h_vmem=32G
 
