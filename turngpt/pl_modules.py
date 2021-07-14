@@ -158,15 +158,10 @@ class TurnGPT(pl.LightningModule):
         loss = self.loss_function(output["logits"], labels)
 
         self.log(
-            "train_loss", loss, on_step=True, on_epoch=False, prog_bar=True, logger=True
+            "train_loss", loss, on_step=True, on_epoch=False, prog_bar=True, logger=True,
         )
         self.log(
-            "avg_train_loss",
-            loss,
-            on_step=False,
-            on_epoch=True,
-            prog_bar=False,
-            logger=True,
+            "avg_train_loss", loss, on_step=False, on_epoch=True, prog_bar=False, logger=True,
         )
         return {"loss": loss}
 

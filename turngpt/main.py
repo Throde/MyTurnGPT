@@ -16,6 +16,7 @@ from ttd.basebuilder import add_builder_specific_args
 from ttd.utils import get_run_dir
 
 from turngpt_dm import TurnGPTDM
+from custom_progress_bar import LitProgressBar
 
 
 def main(args):
@@ -33,7 +34,8 @@ def main(args):
     # ------------------------------------------------------------------
     # Checkpoint callback (early stopping)
     checkpoint_callback = None
-    callbacks = None
+    bar = LitProgressBar()  # DH: using custom progress bar to fallback to ascii
+    callbacks = [bar]
     local_rank = environ.get("LOCAL_RANK", 0)   # used in distributed training. host's local_rank=0 (highest priority)
     if local_rank == 0:
         # do the following only if this code is executed on the host machine
@@ -65,7 +67,7 @@ def main(args):
                 strict=True,  # crash if "monitor" is not found in val metrics
                 verbose=True,
             )
-            callbacks = [early_stop_callback]
+            callbacks.append(early_stop_callback)
         print("-" * 50)
 
     # DH: data config and callbacks ok. Wait to progress.
