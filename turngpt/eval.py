@@ -123,7 +123,7 @@ class TurnGPTEval(pl.LightningModule):
 
         with torch.no_grad():
             total_loss = []
-            for b in tqdm(dloader, desc="perplexity"):
+            for b in tqdm(dloader, desc="perplexity", ascii=True):
                 o = self.model.validation_step(
                     [b[0].to(self.device), b[1].to(self.device)]
                 )
@@ -475,9 +475,7 @@ class TurnGPTEval(pl.LightningModule):
         self, test_dataloader, prob_thresh=0.2, n_context=4, m=70, normalize=True
     ):
         print("Calculating the IG for all valid turn-shift predictions")
-        print(
-            "This function is very slow (forward/backward pass for each target focus)"
-        )
+        print("This function is very slow (forward/backward pass for each target focus)")
         print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
 
         turn_context_ig = []
@@ -1002,6 +1000,19 @@ if __name__ == "__main__":
             context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
         )
         fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png")) # png save path
+        torch.save(
+            context_ig,
+            join(savepath, f"ig_{args.datasets}_{args.split}.pt"),  # pt save path
+        )
+
+    if args.word_ig:
+        word_ig = evaluation_model.word_IG(
+            ##
+        )
+        fig, ax = Plots.context_attention(
+            # 
+        )
+        fig.savefig(join(savepath, f"word_ig_{args.datasets}_{args.split}.png")) # png save path
         torch.save(
             context_ig,
             join(savepath, f"ig_{args.datasets}_{args.split}.pt"),  # pt save path
