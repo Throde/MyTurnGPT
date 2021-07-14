@@ -1,4 +1,5 @@
-from pytorch_lightning.callbacks import sys, tqdm, ProgressBar
+import sys
+from pytorch_lightning.callbacks import tqdm, ProgressBar
 
 # DH: for windows display (partial support for unicode, smooth block will not be shown)
 # override get_progress_bar_dict() hook to fall back to ascii only progress bar
