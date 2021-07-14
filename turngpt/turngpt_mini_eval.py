@@ -66,7 +66,7 @@ if __name__ == "__main__":
     batch = next(iter(dm.val_dataloader()))
 
     loss = []
-    for b in tqdm(dm.val_dataloader()):
+    for b in tqdm(dm.val_dataloader(), ascii=True):
         out = model.validation_step([b[0].to("cuda"), b[1].to("cuda")])
         loss.append(out["val_loss"])
 

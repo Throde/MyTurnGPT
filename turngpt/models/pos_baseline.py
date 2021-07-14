@@ -88,7 +88,7 @@ def debug():
     dm.setup("fit")
 
     pos_model = GramTrainer()
-    for data in tqdm(dm.train_dset, desc=f"Train Pos"):
+    for data in tqdm(dm.train_dset, desc=f"Train Pos", ascii=True):
         pos_model.process(data["pos"])
     stats = pos_model.finalize()
 
@@ -150,6 +150,6 @@ if __name__ == "__main__":
     dm.setup("fit")
 
     pos_model = GramTrainer()
-    for data in tqdm(dm.train_dset, desc=f"Train Pos"):
+    for data in tqdm(dm.train_dset, desc=f"Train Pos", ascii=True):
         pos_model.process(data["pos"])
     stats = pos_model.finalize()

@@ -123,7 +123,7 @@ class TurnGPTEval(pl.LightningModule):
 
         with torch.no_grad():
             total_loss = []
-            for b in tqdm(dloader, desc="perplexity", ascii=True):
+            for b in tqdm(dloader, desc="Perplexity", ascii=True):
                 o = self.model.validation_step(
                     [b[0].to(self.device), b[1].to(self.device)]
                 )
@@ -140,7 +140,7 @@ class TurnGPTEval(pl.LightningModule):
         self.eval()
         all_pos = []
         all_neg = []
-        for batch in tqdm(test_dataloader, desc="Classification"):
+        for batch in tqdm(test_dataloader, desc="Classification", ascii=True):
             input_ids, speaker_ids = batch[0], batch[1]
             # label = input_ids[:, 1:]
             input_ids = input_ids[:, :-1]
@@ -186,7 +186,7 @@ class TurnGPTEval(pl.LightningModule):
 
         # batch = next(iter(test_dataloader))
         for n_batch, batch in enumerate(
-            tqdm(test_dataloader, total=max_batches, desc="Context Ablation")
+            tqdm(test_dataloader, total=max_batches, desc="Context Ablation", ascii=True)
         ):
             if max_batches is not None and n_batch == max_batches:
                 break
@@ -285,7 +285,7 @@ class TurnGPTEval(pl.LightningModule):
         self.model.eval()
         turn_context_attention = []
         skipped = 0  # n_batches skipped
-        for batch in tqdm(test_dataloader, desc="Context Attention"):
+        for batch in tqdm(test_dataloader, desc="Context Attention", ascii=True):
             input_ids, speaker_ids = batch[0], batch[1]
 
             # Get likelihood over trp / turn-shifts over btch
@@ -413,7 +413,7 @@ class TurnGPTEval(pl.LightningModule):
         #             p.grad.zero_()
 
         if use_pbar:
-            pbar = tqdm(interpolated_inputs, desc="IG")
+            pbar = tqdm(interpolated_inputs, desc="IG", ascii=True)
         else:
             pbar = interpolated_inputs
 
@@ -482,7 +482,7 @@ class TurnGPTEval(pl.LightningModule):
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        for batch in tqdm(test_dataloader, desc="Context IG"):
+        for batch in tqdm(test_dataloader, desc="Context IG", ascii=True):
             input_ids, speaker_ids = batch[0], batch[1]
 
             # Get likelihood over trp / turn-shifts over batch
@@ -592,7 +592,7 @@ class TurnGPTEval(pl.LightningModule):
         prediction_dist = []
         start_words = []
         samples = []
-        for step in tqdm(range(max_index - start_index), desc="Prediction Hist"):
+        for step in tqdm(range(max_index - start_index), desc="Prediction Hist", ascii=True):
             current_ind = start_index + step
             tmp_in = input_ids[
                 :, : current_ind + 1

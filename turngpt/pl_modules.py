@@ -49,7 +49,7 @@ class TurnGPT(pl.LightningModule):
                 speaker_ids.clone()
             )  # store all data even if passt the block size
         if use_pbar:
-            pbar = tqdm(range(steps), desc="TurnGPT Sampling")
+            pbar = tqdm(range(steps), desc="TurnGPT Sampling", ascii=True)
         else:
             pbar = range(steps)
 
