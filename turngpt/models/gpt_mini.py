@@ -180,6 +180,8 @@ class GPT(nn.Module):
             ]  # each position maps to a (learnable) vector
             total_emb = token_embeddings + position_embeddings
 
+            print(self.use_speaker_emb, speaker_ids)
+
             if self.use_speaker_emb and speaker_ids is not None:
                 try: 
                     speaker_embeddings = self.tok_emb(speaker_ids)

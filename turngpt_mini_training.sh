@@ -11,7 +11,7 @@
 #$ -e turngpt_mini_err.log
 #$ -l h_rt=36:00:00 
 #$ -pe gpu 1
-#$ -l h_vmem=32G
+#$ -l h_vmem=48G
 
 # priority
 #$ -P lel_hcrc_cstr_students
