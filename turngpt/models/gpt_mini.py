@@ -169,6 +169,7 @@ class GPT(nn.Module):
     def embedding(self, idx, speaker_ids=None):
         b, t = idx.size()
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
+        idx = torch.tensor(idx, dtype=torch.float)
         x = self.tok_emb(idx)
 
         # try:
@@ -201,6 +202,7 @@ class GPT(nn.Module):
         return x
 
     def forward(self, idx, speaker_ids=None):
+
         z = self.transformer(idx, speaker_ids)
         output = {"z": z}
         output["logits"] = self.head(z)
