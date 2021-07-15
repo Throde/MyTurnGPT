@@ -168,7 +168,7 @@ class GPT(nn.Module):
     def embedding(self, idx, speaker_ids=None):
         b, t = idx.size()
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
-        token_embeddings = self.tok_emb(idx)
+        x = self.tok_emb(idx)
 
         # try:
         #     # forward the GPT model
