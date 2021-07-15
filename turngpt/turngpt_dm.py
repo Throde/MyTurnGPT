@@ -102,12 +102,7 @@ class TurnGPTDM(pl.LightningDataModule):
             self.train_filepaths = []
             self.val_filepaths = []
 
-            # DH breakpoint
-            print(">> self.builders: ", self.builders)
             for builder in self.builders:
-                #print(">> builder: ", builder)
-                #print(builder.train_filepaths)
-                #print(builder.val_filepaths)
                 for json_name in builder.train_filepaths:
                     self.train_filepaths.append(join(builder.task_path, json_name))
 

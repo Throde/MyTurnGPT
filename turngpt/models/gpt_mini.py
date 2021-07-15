@@ -181,11 +181,11 @@ class GPT(nn.Module):
             total_emb = token_embeddings + position_embeddings
 
             if self.use_speaker_emb and speaker_ids is not None:
-                speaker_embeddings = self.tok_emb(speaker_ids)
                 try: 
-                    total_emb = total_emb + speaker_embeddings  # DH flag: += -> = . + .
+                    speaker_embeddings = self.tok_emb(speaker_ids)
                 except:
                     input(">> smaller problem 2")
+                total_emb += speaker_embeddings
         except:
             input(">> here's bigger problem")
 
