@@ -169,8 +169,10 @@ class GPT(nn.Module):
     def embedding(self, idx, speaker_ids=None):
         b, t = idx.size()
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
-        idx = torch.tensor(idx, dtype=torch.float)
-        x = self.tok_emb(idx)
+        print(t)
+        token_embeddings = self.tok_emb(idx)
+        position_embeddings = self.pos_emb[:, :t, :]
+        total_emb = token_embeddings + position_embeddings
 
         # try:
         #     # forward the GPT model
@@ -192,7 +194,7 @@ class GPT(nn.Module):
         # except:
         #     input(">> here's bigger problem")
 
-        # x = self.drop(total_emb)
+        x = self.drop(total_emb)
         return x
 
     def transformer(self, idx, speaker_ids=None):
