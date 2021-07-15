@@ -166,13 +166,13 @@ class GPT(nn.Module):
     def get_block_size(self):
         return self.block_size
 
-    def embedding(self, idx, speaker_ids=None):
-        b, t = idx.size()
+    def embedding(self, x, speaker_ids=None):
+        b, t = x.size()
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
         print(t)
-        token_embeddings = self.tok_emb(idx)
-        position_embeddings = self.pos_emb[:, :t, :]
-        total_emb = token_embeddings + position_embeddings
+        token_embeddings_X = self.tok_emb(x)
+        position_embeddings_x = self.pos_emb[:, :t, :]
+        total_emb = token_embeddings_X + position_embeddings_x
 
         # try:
         #     # forward the GPT model
@@ -197,15 +197,15 @@ class GPT(nn.Module):
         x = self.drop(total_emb)
         return x
 
-    def transformer(self, idx, speaker_ids=None):
-        x = self.embedding(idx, speaker_ids)
+    def transformer(self, x, speaker_ids=None):
+        x = self.embedding(x, speaker_ids)
         x = self.blocks(x)
         x = self.ln_f(x)
         return x
 
-    def forward(self, idx, speaker_ids=None):
+    def forward(self, x, speaker_ids=None):
 
-        z = self.transformer(idx, speaker_ids)
+        z = self.transformer(x, speaker_ids)
         output = {"z": z}
         output["logits"] = self.head(z)
         return output
