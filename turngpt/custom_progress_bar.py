@@ -1,9 +1,43 @@
-import sys
-from pytorch_lightning.callbacks import tqdm, ProgressBar
-
 # DH: for windows display (partial support for unicode, smooth block will not be shown)
-# override get_progress_bar_dict() hook to fall back to ascii only progress bar
-# (this method is originally defined in pytorch_lighning/core/lightning.py)
+# customize the progress bar to fall back to ascii-only progress bar.
+# This 'tqdm' and super class 'ProgressBar' is originally defined in pytorch_lighning/core/lightning.py
+# Source code: https://github.com/PyTorchLightning/pytorch-lightning
+
+import importlib
+import sys
+
+from pytorch_lightning.callbacks import ProgressBar
+
+if importlib.util.find_spec('ipywidgets') is not None:
+    from tqdm.auto import tqdm as _tqdm
+else:
+    from tqdm import tqdm as _tqdm
+
+
+_PAD_SIZE = 5
+
+
+class tqdm(_tqdm):
+    """
+    Custom tqdm progressbar where we append 0 to floating points/strings to prevent the progress bar from flickering
+    """
+
+    @staticmethod
+    def format_num(n) -> str:
+        """ Add additional padding to the formatted numbers """
+        should_be_padded = isinstance(n, (float, str))
+        if not isinstance(n, str):
+            n = _tqdm.format_num(n)
+        if should_be_padded and 'e' not in n:
+            if '.' not in n and len(n) < _PAD_SIZE:
+                try:
+                    _ = float(n)
+                except ValueError:
+                    return n
+                n += '.'
+            n += "0" * (_PAD_SIZE - len(n))
+        return n
+
 
 class LitProgressBar(ProgressBar):
 
