@@ -7,6 +7,10 @@ from os import environ
 #environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import torch
+# DH: added to fix "RuntimeError: one of the variables needed for gradient computation has been modified by 
+# an inplace operation: [torch.cuda.LongTensor [1, 511]] is at version 2; expected version 1 instead.""
+torch.autograd.set_detect_anomaly(True)
+
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
