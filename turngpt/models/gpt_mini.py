@@ -168,30 +168,29 @@ class GPT(nn.Module):
     def embedding(self, idx, speaker_ids=None):
         b, t = idx.size()
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
+        token_embeddings = self.tok_emb(idx)
 
-        try:
-            # forward the GPT model
-            try:
-                token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
-            except:
-                input(">> smaller problem 1")
-            position_embeddings = self.pos_emb[
-                :, :t, :
-            ]  # each position maps to a (learnable) vector
-            total_emb = token_embeddings + position_embeddings
+        # try:
+        #     # forward the GPT model
+        #     try:
+        #         token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
+        #     except:
+        #         input(">> smaller problem 1")
+        #     position_embeddings = self.pos_emb[
+        #         :, :t, :
+        #     ]  # each position maps to a (learnable) vector
+        #     total_emb = token_embeddings + position_embeddings
 
-            print(self.use_speaker_emb, speaker_ids)
+        #     if self.use_speaker_emb and speaker_ids is not None:
+        #         try: 
+        #             speaker_embeddings = self.tok_emb(speaker_ids)
+        #         except:
+        #             input(">> smaller problem 2")
+        #         total_emb += speaker_embeddings
+        # except:
+        #     input(">> here's bigger problem")
 
-            if self.use_speaker_emb and speaker_ids is not None:
-                try: 
-                    speaker_embeddings = self.tok_emb(speaker_ids)
-                except:
-                    input(">> smaller problem 2")
-                total_emb += speaker_embeddings
-        except:
-            input(">> here's bigger problem")
-
-        x = self.drop(total_emb)
+        # x = self.drop(total_emb)
         return x
 
     def transformer(self, idx, speaker_ids=None):
