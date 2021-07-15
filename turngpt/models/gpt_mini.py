@@ -130,7 +130,7 @@ class GPT(nn.Module):
 
         # input embedding stem
         # self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
-        self.tok_emb = nn.Linear(config.vocab_size, config.n_embd)
+        self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.n_embd))
         self.drop = nn.Dropout(config.embd_pdrop)
 
