@@ -272,6 +272,7 @@ if __name__ == "__main__":
         vocab_size=len(tokenizer), block_size=256, n_embd=256, n_head=8, n_layer=8
     )
     model = GPT(config)
+    print(model)
 
     print("model: ", model.get_size())
 
