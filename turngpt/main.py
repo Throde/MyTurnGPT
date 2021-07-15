@@ -38,9 +38,7 @@ def main(args):
     # ------------------------------------------------------------------
     # Checkpoint callback (early stopping)
     checkpoint_callback = None
-    #bar = LitProgressBar()  # DH: using custom progress bar to fallback to ascii
-    #callbacks = [bar]
-    callbacks = []
+    callbacks = [LitProgressBar()]  # DH: using custom progress bar to fallback to ascii
     local_rank = environ.get("LOCAL_RANK", 0)   # used in distributed training. host's local_rank=0 (highest priority)
     if local_rank == 0:
         # do the following only if this code is executed on the host machine
