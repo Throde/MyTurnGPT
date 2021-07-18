@@ -174,11 +174,11 @@ class GPT(nn.Module):
         position_embeddings = self.pos_emb[
             :, :t, :
         ]  # each position maps to a (learnable) vector
-        total_emb = token_embeddings + position_embeddings
+        total_emb = token_embeddings.clone() + position_embeddings.clone()  # DH: add clone()
 
         if self.use_speaker_emb and speaker_ids is not None:
             speaker_embeddings = self.tok_emb(speaker_ids)
-            total_emb += speaker_embeddings
+            total_emb = total_emb + speaker_embeddings  # DH: modify from +=
 
         x = self.drop(total_emb)
         return x
