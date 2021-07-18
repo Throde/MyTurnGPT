@@ -1,21 +1,21 @@
 from argparse import ArgumentParser
 from os.path import join
 from os import environ
-# avoid python creating too many threads causing thread-overflow errors:
-# > OpenBLAS blas_thread_init: pthread_create failed for thread 3 of 32: Resource temporarily unavailable
-# > OpenBLAS blas_thread_init: RLIMIT_NPROC 200 current, 200 max
-environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import torch
+# DH: added to fix "RuntimeError: one of the variables needed for gradient computation has been modified by 
+# an inplace operation: [torch.cuda.LongTensor [1, 511]] is at version 2; expected version 1 instead.""
+torch.autograd.set_detect_anomaly(True)
+
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
-
 
 from ttd.basebuilder import add_builder_specific_args
 from ttd.utils import get_run_dir
 
 from turngpt_dm import TurnGPTDM
+from custom_progress_bar import LitProgressBar
 
 
 def main(args):
@@ -26,11 +26,15 @@ def main(args):
     print("DataLoader")
     print("Batch size: ", args.batch_size)
     print("num workers: ", args.num_workers)
+    # DH
+    print("Using token dict: ", args.tokenizer_special_dict)
+    print("Using pretrained tokenizer type: ", args.tokenizer_pretrained)
 
     # ------------------------------------------------------------------
     # Checkpoint callback (early stopping)
     checkpoint_callback = None
-    callbacks = None
+    #callbacks = None
+    callbacks = [LitProgressBar()]  # DH: using custom progress bar to fallback to ascii
     local_rank = environ.get("LOCAL_RANK", 0)
     if local_rank == 0:
         print("LOCAL_RANK: ", local_rank)
@@ -61,7 +65,8 @@ def main(args):
                 strict=True,  # crash if "monitor" is not found in val metrics
                 verbose=True,
             )
-            callbacks = [early_stop_callback]
+            #callbacks = [early_stop_callback]
+            callbacks.append(early_stop_callback)
         print("-" * 50)
 
     # ------------------------------------------------------------------
