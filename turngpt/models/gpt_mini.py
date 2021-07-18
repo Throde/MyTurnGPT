@@ -171,14 +171,14 @@ class GPT(nn.Module):
 
         # forward the GPT model
         # DH: try2 add clone()
-        token_embeddings = self.tok_emb(idx.clone())  # each index maps to a (learnable) vector
+        token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
         position_embeddings = self.pos_emb[
             :, :t, :
         ]  # each position maps to a (learnable) vector
         total_emb = token_embeddings + position_embeddings
 
         if self.use_speaker_emb and speaker_ids is not None:
-            speaker_embeddings = self.tok_emb(speaker_ids)
+            speaker_embeddings = self.tok_emb(speaker_ids.clone())  # DH: add clone()
             total_emb += speaker_embeddings
 
         x = self.drop(total_emb)
