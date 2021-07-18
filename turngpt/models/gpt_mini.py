@@ -170,15 +170,16 @@ class GPT(nn.Module):
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
 
         # forward the GPT model
-        token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
+        # DH: try2 add clone()
+        token_embeddings = self.tok_emb(idx.clone()).clone()  # each index maps to a (learnable) vector
         position_embeddings = self.pos_emb[
             :, :t, :
         ]  # each position maps to a (learnable) vector
-        total_emb = token_embeddings.clone() + position_embeddings.clone()  # DH: add clone()
+        total_emb = token_embeddings + position_embeddings
 
         if self.use_speaker_emb and speaker_ids is not None:
             speaker_embeddings = self.tok_emb(speaker_ids)
-            total_emb = total_emb + speaker_embeddings  # DH: modify from +=
+            total_emb += speaker_embeddings
 
         x = self.drop(total_emb)
         return x
