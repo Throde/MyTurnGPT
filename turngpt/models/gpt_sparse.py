@@ -330,7 +330,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.vocab_size = 52057
     model = SparseGPT(args)
-    
 
     device = "cuda"
     model = model.to(device)

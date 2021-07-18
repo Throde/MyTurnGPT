@@ -1,5 +1,4 @@
 from argparse import ArgumentParser
-# tqdm: a progress bar printer
 from tqdm import tqdm
 
 import torch
@@ -9,7 +8,7 @@ import pytorch_lightning as pl
 
 class TurnGPT(pl.LightningModule):
     def forward(self, input_ids, speaker_ids, **kwargs):
-        """ labels are the same as input_ids shift and padding fix inside model"""
+        """ labels are the the same as input_ids shift and padding fix inside model"""
         return self.model(input_ids, speaker_ids=speaker_ids, **kwargs)
 
     @torch.no_grad()
@@ -27,7 +26,7 @@ class TurnGPT(pl.LightningModule):
         stop_at_turn_shift=True,
         use_pbar=False,
     ):
-        """heavily based on minGPT/utils in https://github.com/karpathy/minGPT """
+        """heavily basged on minGPT/utils in https://github.com/karpathy/minGPT """
 
         # collect samples and remove from processing when reaching a speaker token
         if stop_at_turn_shift:
@@ -49,7 +48,7 @@ class TurnGPT(pl.LightningModule):
                 speaker_ids.clone()
             )  # store all data even if passt the block size
         if use_pbar:
-            pbar = tqdm(range(steps), desc="TurnGPT Sampling", ascii=True)
+            pbar = tqdm(range(steps), desc="TurnGPT Sampling")
         else:
             pbar = range(steps)
 
@@ -158,10 +157,15 @@ class TurnGPT(pl.LightningModule):
         loss = self.loss_function(output["logits"], labels)
 
         self.log(
-            "train_loss", loss, on_step=True, on_epoch=False, prog_bar=True, logger=True,
+            "train_loss", loss, on_step=True, on_epoch=False, prog_bar=True, logger=True
         )
         self.log(
-            "avg_train_loss", loss, on_step=False, on_epoch=True, prog_bar=False, logger=True,
+            "avg_train_loss",
+            loss,
+            on_step=False,
+            on_epoch=True,
+            prog_bar=False,
+            logger=True,
         )
         return {"loss": loss}
 

@@ -1,7 +1,7 @@
 from argparse import ArgumentParser
 import math
 import torch
-from tqdm import tqdm   # progress printer
+from tqdm import tqdm
 from os.path import split, join
 from os import makedirs
 
@@ -47,10 +47,7 @@ def load():
         type=str,
         default="train",  # val, test
     )
-    # DH: parse_known_args() 
-    # temp_args= parser with keys already added using add_argument so far;
-    # _= list of keys that given in the cmd (python eval --key) but not yet added by add_argument, will be stored and added later when add_argument is used
-    temp_args, _ = parser.parse_known_args()    
+    temp_args, _ = parser.parse_known_args()
 
     # Add all datasets
     datasets = temp_args.datasets
@@ -91,7 +88,7 @@ def get_dataloader(dm, args):
     else:  # all
         dm.test_dset.filepaths += dm.train_dset.filepaths
         dm.test_dset.filepaths += dm.val_dset.filepaths
-    return dm.test_dataloader() # DH: torch.utils.data.DataLoader Object
+    return dm.test_dataloader()
 
 
 class TurnGPTEval(pl.LightningModule):
@@ -107,7 +104,7 @@ class TurnGPTEval(pl.LightningModule):
 
     def trp(self, input_ids, speaker_ids, output_attentions=False):
         out = self.model(
-            input_ids, speaker_ids=speaker_ids#, output_attentions=output_attentions
+            input_ids, speaker_ids=speaker_ids, output_attentions=output_attentions
         )
         logits = out["logits"]
         prob = F.softmax(logits, dim=-1)
@@ -123,7 +120,7 @@ class TurnGPTEval(pl.LightningModule):
 
         with torch.no_grad():
             total_loss = []
-            for b in tqdm(dloader, desc="Perplexity", ascii=True):
+            for b in tqdm(dloader, desc="perplexity"):
                 o = self.model.validation_step(
                     [b[0].to(self.device), b[1].to(self.device)]
                 )
@@ -140,7 +137,7 @@ class TurnGPTEval(pl.LightningModule):
         self.eval()
         all_pos = []
         all_neg = []
-        for batch in tqdm(test_dataloader, desc="Classification", ascii=True):
+        for batch in tqdm(test_dataloader, desc="Classification"):
             input_ids, speaker_ids = batch[0], batch[1]
             # label = input_ids[:, 1:]
             input_ids = input_ids[:, :-1]
@@ -186,7 +183,7 @@ class TurnGPTEval(pl.LightningModule):
 
         # batch = next(iter(test_dataloader))
         for n_batch, batch in enumerate(
-            tqdm(test_dataloader, total=max_batches, desc="Context Ablation", ascii=True)
+            tqdm(test_dataloader, total=max_batches, desc="Context Ablation")
         ):
             if max_batches is not None and n_batch == max_batches:
                 break
@@ -285,7 +282,7 @@ class TurnGPTEval(pl.LightningModule):
         self.model.eval()
         turn_context_attention = []
         skipped = 0  # n_batches skipped
-        for batch in tqdm(test_dataloader, desc="Context Attention", ascii=True):
+        for batch in tqdm(test_dataloader, desc="Context Attention"):
             input_ids, speaker_ids = batch[0], batch[1]
 
             # Get likelihood over trp / turn-shifts over btch
@@ -413,7 +410,7 @@ class TurnGPTEval(pl.LightningModule):
         #             p.grad.zero_()
 
         if use_pbar:
-            pbar = tqdm(interpolated_inputs, desc="IG", ascii=True)
+            pbar = tqdm(interpolated_inputs, desc="IG")
         else:
             pbar = interpolated_inputs
 
@@ -461,7 +458,7 @@ class TurnGPTEval(pl.LightningModule):
             error_perc = abs(round(diff * 100 / score_diff, 3))
 
         if use_pbar:
-            print("Error: ",error_perc,"%")
+            print(f"Error: {error_perc}%")
             if error_perc >= 5:
                 print("Error is larger than 5%. Increase 'm'...")
         return {
@@ -475,14 +472,16 @@ class TurnGPTEval(pl.LightningModule):
         self, test_dataloader, prob_thresh=0.2, n_context=4, m=70, normalize=True
     ):
         print("Calculating the IG for all valid turn-shift predictions")
-        print("This function is very slow (forward/backward pass for each target focus)")
+        print(
+            "This function is very slow (forward/backward pass for each target focus)"
+        )
         print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
 
         turn_context_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        for batch in tqdm(test_dataloader, desc="Context IG", ascii=True):
+        for batch in tqdm(test_dataloader, desc="Context IG"):
             input_ids, speaker_ids = batch[0], batch[1]
 
             # Get likelihood over trp / turn-shifts over batch
@@ -592,7 +591,7 @@ class TurnGPTEval(pl.LightningModule):
         prediction_dist = []
         start_words = []
         samples = []
-        for step in tqdm(range(max_index - start_index), desc="Prediction Hist", ascii=True):
+        for step in tqdm(range(max_index - start_index), desc="Prediction Hist"):
             current_ind = start_index + step
             tmp_in = input_ids[
                 :, : current_ind + 1
@@ -882,9 +881,6 @@ if __name__ == "__main__":
     makedirs(savepath, exist_ok=True)
 
     test_dataloader = get_dataloader(dm, args)
-    # DH:
-    print(">> Model, data ok; savepath:", savepath)
-    input(">> [1/6] Press any key to continue")
 
     if args.perplexity:
         # ce_loss, ppl = perplexity(model, dm, args)
@@ -892,23 +888,19 @@ if __name__ == "__main__":
         print("split: ", args.split)
         print("avg CE loss: ", ce_loss)
         print("ppl (nats): ", ppl)
-        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))   # perp save path
+        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))
 
     if args.classification:
         score = evaluation_model.classification(test_dataloader)
         fig, ax = Plots.bacc(score, plot=args.plot)
         fig.savefig(join(savepath, f"bacc_{args.datasets}_{args.split}.png"))
-        torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))  # classif save path
+        torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))
         pgm = score["positive_guesses"].mean()
         pgs = score["positive_guesses"].std()
         ngm = score["negative_guesses"].mean()
         ngs = score["negative_guesses"].std()
         print("Pos: ", pgm, pgs)
         print("Pos: ", ngm, ngs)
-    
-    # DH:
-    print(">> Perplexity and classification work done")
-    input(">> [2/6] Press any key to continue")
 
     n_context = 4
 
@@ -929,12 +921,8 @@ if __name__ == "__main__":
             thresh_score.append(score["bacc"][i])
 
         fig, ax = Plots.context_ablation(thresh_score, plot=args.plot)
-        fig.savefig(join(savepath, f"abl_{args.datasets}_{args.split}.png"))    # diagram save path
-        torch.save(predictions, join(savepath, f"abl_{args.datasets}_{args.split}.pt")) # pt save path
-
-    # DH:
-    print(">> Context ablation work done")
-    input(">> [3/6] Press any key to continue")
+        fig.savefig(join(savepath, f"abl_{args.datasets}_{args.split}.png"))
+        torch.save(predictions, join(savepath, f"abl_{args.datasets}_{args.split}.pt"))
 
     prob_thresh = 0.2
     if args.context_attention:
@@ -942,29 +930,20 @@ if __name__ == "__main__":
             test_dataloader, prob_thresh, n_context
         )
         fig, ax = Plots.context_attention(context_attention_score, plot=args.plot)
-        fig.savefig(join(savepath, f"att_{args.datasets}_{args.split}.png"))    # png save path
+        fig.savefig(join(savepath, f"att_{args.datasets}_{args.split}.png"))
         torch.save(
             context_attention_score,
-            join(savepath, f"att_{args.datasets}_{args.split}.pt"), # pt save path
+            join(savepath, f"att_{args.datasets}_{args.split}.pt"),
         )
-
-    # DH:
-    print(">> Context attention work done")
-    input(">> [4/6] Press any key to continue")
 
     if args.prediction_hist:
         n_samples = 1000
         horizon = 41
         batch_size = 40
-        # turns = [
-        #     " yesterday we met in the park",
-        #     " okay when will you meet again",
-        #     " tomorrow",
-        #     "",
-        # ]
         turns = [
-            " yesterday i met him in the park",
-            " he is so excited",
+            " yesterday we met in the park",
+            " okay when will you meet again",
+            " tomorrow",
             "",
         ]
         input_ids, speaker_ids = turns_to_turngpt_tensors(
@@ -986,11 +965,7 @@ if __name__ == "__main__":
             horizon=horizon,
             plot=args.plot,
         )
-        fig.savefig(join(savepath, f"pred_hist.png"))   # png save path
-
-    # DH:
-    print(">> Prediction hist work done")
-    input(">> [5/6] Press any key to continue")
+        fig.savefig(join(savepath, f"pred_hist.png"))
 
     if args.context_ig:
         context_ig = evaluation_model.context_IG(
@@ -999,26 +974,10 @@ if __name__ == "__main__":
         fig, ax = Plots.context_attention(
             context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
         )
-        fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png")) # png save path
+        fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png"))
         torch.save(
             context_ig,
-            join(savepath, f"ig_{args.datasets}_{args.split}.pt"),  # pt save path
+            join(savepath, f"ig_{args.datasets}_{args.split}.pt"),
         )
 
-    if args.word_ig:
-        word_ig = evaluation_model.word_IG(
-            ##
-        )
-        fig, ax = Plots.context_attention(
-            # 
-        )
-        fig.savefig(join(savepath, f"word_ig_{args.datasets}_{args.split}.png")) # png save path
-        torch.save(
-            context_ig,
-            join(savepath, f"ig_{args.datasets}_{args.split}.pt"),  # pt save path
-        )
-
-    #ans = input("end?")
-    # DH:
-    print(">> Context IG work done; end?")
-    input(">> [6/6] Press any key to continue")
+    ans = input("end?")

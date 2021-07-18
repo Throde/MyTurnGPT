@@ -4,13 +4,9 @@ from os import environ
 # avoid python creating too many threads causing thread-overflow errors:
 # > OpenBLAS blas_thread_init: pthread_create failed for thread 3 of 32: Resource temporarily unavailable
 # > OpenBLAS blas_thread_init: RLIMIT_NPROC 200 current, 200 max
-#environ['OPENBLAS_NUM_THREADS'] = '1'
+environ['OPENBLAS_NUM_THREADS'] = '1'
 
 import torch
-# DH: added to fix "RuntimeError: one of the variables needed for gradient computation has been modified by 
-# an inplace operation: [torch.cuda.LongTensor [1, 511]] is at version 2; expected version 1 instead.""
-torch.autograd.set_detect_anomaly(True)
-
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
@@ -20,7 +16,6 @@ from ttd.basebuilder import add_builder_specific_args
 from ttd.utils import get_run_dir
 
 from turngpt_dm import TurnGPTDM
-from custom_progress_bar import LitProgressBar
 
 
 def main(args):
@@ -31,17 +26,13 @@ def main(args):
     print("DataLoader")
     print("Batch size: ", args.batch_size)
     print("num workers: ", args.num_workers)
-    # DH
-    print("Using token dict: ", args.tokenizer_special_dict)
-    print("Using pretrained tokenizer type: ", args.tokenizer_pretrained)
 
     # ------------------------------------------------------------------
     # Checkpoint callback (early stopping)
     checkpoint_callback = None
-    callbacks = [LitProgressBar()]  # DH: using custom progress bar to fallback to ascii
-    local_rank = environ.get("LOCAL_RANK", 0)   # used in distributed training. host's local_rank=0 (highest priority)
+    callbacks = None
+    local_rank = environ.get("LOCAL_RANK", 0)
     if local_rank == 0:
-        # do the following only if this code is executed on the host machine
         print("LOCAL_RANK: ", local_rank)
         print("Logging -> ", args.save_dir)
 
@@ -52,8 +43,8 @@ def main(args):
         checkpoint_callback = ModelCheckpoint(
             dirpath=ch_path,
             filename="{epoch}-{val_loss:.5f}",
-            save_top_k=2,   # default: -1, meaning all models are saved. and no monitor needed in this condition
-            mode="min", # min val_loss (would use max if monitor is val_acc)
+            save_top_k=2,
+            mode="min",
             monitor="val_loss",
         )
 
@@ -66,16 +57,12 @@ def main(args):
             print(f"Early stopping (patience={args.patience})")
             early_stop_callback = EarlyStopping(
                 monitor="val_loss",
-                patience=args.patience, # if monitored value hasn't improved for this epochs, early stop
+                patience=args.patience,
                 strict=True,  # crash if "monitor" is not found in val metrics
                 verbose=True,
             )
-            callbacks.append(early_stop_callback)
+            callbacks = [early_stop_callback]
         print("-" * 50)
-
-    # DH: data config and callbacks ok. Wait to progress.
-    print(">> Data and callbacks configuration ok, continue to prepare data and initialise model...")
-    #input(">> [1/2] Press any key to progress.")
 
     # ------------------------------------------------------------------
     # Trainer
@@ -134,10 +121,6 @@ def main(args):
     else:
         print("n_embd: ", model.n_embd)
     print()
-
-    # DH: data and model preparation ok. Wait to progress.
-    print(">> Data and model preparation ok, continue to model training...")
-    #input(">> [2/2] Press any key to progress.")
 
     # ------------------------------------------------------------------
     # Fit

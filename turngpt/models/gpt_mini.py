@@ -129,7 +129,6 @@ class GPT(nn.Module):
         self.predict_speaker_emb = config.use_speaker_emb
 
         # input embedding stem
-        # self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.n_embd))
         self.drop = nn.Dropout(config.embd_pdrop)
@@ -166,46 +165,32 @@ class GPT(nn.Module):
     def get_block_size(self):
         return self.block_size
 
-    def embedding(self, x, speaker_ids=None):
-        b, t = x.size()
+    def embedding(self, idx, speaker_ids=None):
+        b, t = idx.size()
         assert t <= self.block_size, "Cannot forward, model block size is exhausted."
-        print(t)
-        token_embeddings_X = self.tok_emb(x)
-        position_embeddings_x = self.pos_emb[:, :t, :]
-        total_emb = token_embeddings_X + position_embeddings_x
 
-        # try:
-        #     # forward the GPT model
-        #     try:
-        #         token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
-        #     except:
-        #         input(">> smaller problem 1")
-        #     position_embeddings = self.pos_emb[
-        #         :, :t, :
-        #     ]  # each position maps to a (learnable) vector
-        #     total_emb = token_embeddings + position_embeddings
+        # forward the GPT model
+        token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
+        position_embeddings = self.pos_emb[
+            :, :t, :
+        ]  # each position maps to a (learnable) vector
+        total_emb = token_embeddings + position_embeddings
 
-        #     if self.use_speaker_emb and speaker_ids is not None:
-        #         try: 
-        #             speaker_embeddings = self.tok_emb(speaker_ids)
-        #         except:
-        #             input(">> smaller problem 2")
-        #         total_emb += speaker_embeddings
-        # except:
-        #     input(">> here's bigger problem")
+        if self.use_speaker_emb and speaker_ids is not None:
+            speaker_embeddings = self.tok_emb(speaker_ids)
+            total_emb += speaker_embeddings
 
         x = self.drop(total_emb)
         return x
 
-    def transformer(self, x, speaker_ids=None):
-        x = self.embedding(x, speaker_ids)
+    def transformer(self, idx, speaker_ids=None):
+        x = self.embedding(idx, speaker_ids)
         x = self.blocks(x)
         x = self.ln_f(x)
         return x
 
-    def forward(self, x, speaker_ids=None):
-
-        z = self.transformer(x, speaker_ids)
+    def forward(self, idx, speaker_ids=None):
+        z = self.transformer(idx, speaker_ids)
         output = {"z": z}
         output["logits"] = self.head(z)
         return output
@@ -272,7 +257,6 @@ if __name__ == "__main__":
         vocab_size=len(tokenizer), block_size=256, n_embd=256, n_head=8, n_layer=8
     )
     model = GPT(config)
-    print(model)
 
     print("model: ", model.get_size())
 

@@ -1,4 +1,3 @@
-# TurnGPT Data Module
 from os.path import join
 from argparse import ArgumentParser
 import pytorch_lightning as pl
