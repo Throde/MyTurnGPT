@@ -76,9 +76,10 @@ class TurnGPTModel(nn.Module):
         use_cache=False,
     ):
         # transformer_outputs: last hidden state, (presents), (all hidden_states), (attentions)
+        # DH: add clone()
         transformer_outputs = self.model.transformer(
-            input_ids,
-            token_type_ids=speaker_ids,
+            input_ids.clone(),
+            token_type_ids=speaker_ids.clone(),
             output_attentions=output_attentions,
             output_hidden_states=output_hidden_states,
             use_cache=use_cache,
