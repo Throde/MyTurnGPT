@@ -7,8 +7,8 @@
 #  memory limit of 1 Gbyte: -l h_vmem
 #$ -N turngpt_mini            
 #$ -cwd
-#$ -o turngpt_mini_out.log
-#$ -e turngpt_mini_err.log
+#$ -o train_mini_out.log
+#$ -e train_mini_err.log
 #$ -l h_rt=36:00:00 
 #$ -pe gpu 1
 #$ -l h_vmem=48G
