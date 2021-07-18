@@ -11,7 +11,7 @@
 #$ -e train_err.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu 1
-#$ -l h_vmem=128G
+#$ -l h_vmem=256G
 
 # priority
 #$ -P lel_hcrc_cstr_students
