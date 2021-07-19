@@ -5,10 +5,10 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N turngpt             
+#$ -N taskmaster           
 #$ -cwd
-#$ -o log/train_out.log
-#$ -e log/train_err.log
+#$ -o log/taskmaster_out.log
+#$ -e log/taskmaster_err.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu 1
 #$ -l h_vmem=256G
@@ -32,8 +32,8 @@ source activate slptorch
 # available datasets: taskmaster metalwoz multiwoz coached persona dailydialog
 # python hello.py
 python ./turngpt/main.py \
-  --model pretrained \
-  --datasets maptask switchboard \
+  --model mini \
+  --datasets taskmaster \
   --chunk_size 512 \
   --gpus 1 \
   --batch_size 2 \
