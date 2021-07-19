@@ -69,7 +69,8 @@ def main(args):
             callbacks.append(early_stop_callback)
         print("-" * 50)
 
-    input(">> Configuration ok. Press any key to continue.")
+    # DH breakpoint: 
+    # input(">> Configuration ok. Press any key to continue.")
     # ------------------------------------------------------------------
     # Trainer
     trainer = pl.Trainer.from_argparse_args(
