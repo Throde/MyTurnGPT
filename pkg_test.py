@@ -1,3 +1,0 @@
-import ttd
-
-print("OK")
