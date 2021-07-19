@@ -7,8 +7,8 @@
 #  memory limit of 1 Gbyte: -l h_vmem
 #$ -N written           
 #$ -cwd
-#$ -o log/written_out.log
-#$ -e log/written_err.log
+#$ -o written_log/written_out.log
+#$ -e written_log/written_err.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu 1
 #$ -l h_vmem=256G
