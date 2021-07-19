@@ -144,7 +144,7 @@ if __name__ == "__main__":
     parser = ArgumentParser()
     parser = pl.Trainer.add_argparse_args(parser)
     parser = TurnGPTDM.add_data_specific_args(parser)
-    parser.add_argument("--early_stopping", default=False, type=bool)
+    parser.add_argument("--early_stopping", action="store_true", default=False, type=bool)
     parser.add_argument("--patience", default=10, type=int)
     parser.add_argument(
         "--model",

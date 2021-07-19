@@ -184,5 +184,5 @@ class TurnGPT(pl.LightningModule):
         speaker_ids = speaker_ids[:, :-1].contiguous()
         output = self(input_ids, speaker_ids)
         loss = self.loss_function(output["logits"], labels)
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, prog_bar=True, logger=True)
         return {"val_loss": loss}
