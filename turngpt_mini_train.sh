@@ -9,7 +9,7 @@
 #$ -cwd
 #$ -o log/train_mini_out.log
 #$ -e log/train_mini_err.log
-#$ -l h_rt=36:00:00 
+#$ -l h_rt=48:00:00 
 #$ -pe gpu 1
 #$ -l h_vmem=256G
 
@@ -33,7 +33,8 @@ source activate slptorch
 # python hello.py
 python ./turngpt/main.py \
   --model mini \
-  --datasets maptask switchboard\
+  --datasets taskmaster maptask switchboard\
   --chunk_size 512 \
   --gpus 1 \
   --batch_size 2 \
+  --early_stopping

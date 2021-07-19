@@ -11,7 +11,7 @@
 #$ -e log/train_err.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu 1
-#$ -l h_vmem=256G
+#$ -l h_vmem=512G
 
 # priority
 #$ -P lel_hcrc_cstr_students
@@ -33,7 +33,8 @@ source activate slptorch
 # python hello.py
 python ./turngpt/main.py \
   --model pretrained \
-  --datasets maptask switchboard \
+  --datasets taskmaster maptask switchboard \
   --chunk_size 512 \
   --gpus 1 \
   --batch_size 2 \
+  --early_stopping
