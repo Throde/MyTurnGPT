@@ -473,20 +473,28 @@ class TurnGPTEval(pl.LightningModule):
         self, test_dataloader, prob_thresh=0.2, n_context=4, m=70, normalize=True
     ):
         print("Calculating the IG for all valid turn-shift predictions")
-        print(
-            "This function is very slow (forward/backward pass for each target focus)"
-        )
-        print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
+        print("This function is very slow (forward/backward pass for each target focus)")
+        #print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
 
         turn_context_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
+        print(">> test_dataloader:",test_dataloader)
+        input(">> press any key to continue")
         for batch in tqdm(test_dataloader, desc="Context IG"):
+            print(">> batch:", batch, batch.size())
+            input(">> press any key...")
             input_ids, speaker_ids = batch[0], batch[1]
+            print(">> input_ids", input_ids, input_ids.size() )
+            print(">> speaker_ids", speaker_ids, speaker_ids.size())
+            input(">> press any key...")
 
-            # Get likelihood over trp / turn-shifts over batch
+            # Get likelihood over trp / turn-shifts over batch 
+            # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
+            print(">> trp:", trp)
+            input(">> press any key...")
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
@@ -498,6 +506,9 @@ class TurnGPTEval(pl.LightningModule):
                 sp1_idx=self.sp1_idx,
                 sp2_idx=self.sp2_idx,
             )
+            print(">> focus_bs", focus_bs, len(focus_bs) )
+            print(">> focus_inds", focus_inds, len(focus_inds) )
+            input(">> press any key...")
 
             # Skip batch if no suitable targets was found
             if len(focus_bs) == 0:
@@ -506,15 +517,25 @@ class TurnGPTEval(pl.LightningModule):
 
             # get all turns in batch
             turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+            print(">> turns:", turns, len(turns) )
+            input(">> press any key...")
 
             # Iterate over all the valid focus points and extract the attention over the context and current turn
             for i, b in enumerate(focus_bs):
+                print(">> first item of focus_bs:", i, b)
+                input(">> press any key...")
                 focus_index = focus_inds[i]
                 tmp_turn_context = find_turn_context(focus_index, turns[b], n_context)
+                print(">> focus_index:", focus_index)
+                print(">> turns[b]:", turns[b])
+                print(">> tmp_turn_context:", tmp_turn_context)
+                input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
+                print(">> tmp_input:", tmp_input)
+                print(">> tmp_speaker:", tmp_speaker)
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 focus_token = (
@@ -886,25 +907,26 @@ if __name__ == "__main__":
     print(">> Model, data ok; savepath:", savepath)
     input(">> [1/1] Press any key to continue")
 
-    if args.perplexity:
-        # ce_loss, ppl = perplexity(model, dm, args)
-        ce_loss, ppl = evaluation_model.cross_entropy(test_dataloader)
-        print("split: ", args.split)
-        print("avg CE loss: ", ce_loss)
-        print("ppl (nats): ", ppl)
-        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))
+    if false:   # DH: to exclude computing perplexity and classification
+        if args.perplexity:
+            # ce_loss, ppl = perplexity(model, dm, args)
+            ce_loss, ppl = evaluation_model.cross_entropy(test_dataloader)
+            print("split: ", args.split)
+            print("avg CE loss: ", ce_loss)
+            print("ppl (nats): ", ppl)
+            write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))
 
-    if args.classification:
-        score = evaluation_model.classification(test_dataloader)
-        fig, ax = Plots.bacc(score, plot=args.plot)
-        fig.savefig(join(savepath, f"bacc_{args.datasets}_{args.split}.png"))
-        torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))
-        pgm = score["positive_guesses"].mean()
-        pgs = score["positive_guesses"].std()
-        ngm = score["negative_guesses"].mean()
-        ngs = score["negative_guesses"].std()
-        print("Pos: ", pgm, pgs)
-        print("Pos: ", ngm, ngs)
+        if args.classification:
+            score = evaluation_model.classification(test_dataloader)
+            fig, ax = Plots.bacc(score, plot=args.plot)
+            fig.savefig(join(savepath, f"bacc_{args.datasets}_{args.split}.png"))
+            torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))
+            pgm = score["positive_guesses"].mean()
+            pgs = score["positive_guesses"].std()
+            ngm = score["negative_guesses"].mean()
+            ngs = score["negative_guesses"].std()
+            print("Pos: ", pgm, pgs)
+            print("Pos: ", ngm, ngs)
 
     n_context = 4
 
@@ -976,6 +998,7 @@ if __name__ == "__main__":
         )
         fig.savefig(join(savepath, f"pred_hist.png"))
 
+    # DH NOTE: IG calculation is only available for pretrained model (not for mini).
     if args.context_ig:
         context_ig = evaluation_model.context_IG(
             test_dataloader, prob_thresh, n_context, m=70
