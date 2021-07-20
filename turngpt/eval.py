@@ -907,7 +907,7 @@ if __name__ == "__main__":
     print(">> Model, data ok; savepath:", savepath)
     input(">> [1/1] Press any key to continue")
 
-    if false:   # DH: to exclude computing perplexity and classification
+    if False:   # DH: to exclude computing perplexity and classification
         if args.perplexity:
             # ce_loss, ppl = perplexity(model, dm, args)
             ce_loss, ppl = evaluation_model.cross_entropy(test_dataloader)
