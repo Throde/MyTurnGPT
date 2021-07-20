@@ -105,7 +105,7 @@ class TurnGPTEval(pl.LightningModule):
     def trp(self, input_ids, speaker_ids, output_attentions=False):
         # NOTE: The 'output_attentions' parameter was changed in transformers 3.x. Plz lock down to transformers version 2.5.1
         out = self.model(
-            input_ids, speaker_ids=speaker_ids#, output_attentions=output_attentions
+            input_ids, speaker_ids=speaker_ids#, output_attentions=output_attentions    # DH: problem
         )
         logits = out["logits"]
         prob = F.softmax(logits, dim=-1)
@@ -377,7 +377,7 @@ class TurnGPTEval(pl.LightningModule):
         speaker_ids = speaker_ids.to(self.device)
 
         # Get input embeddings
-        input_embeds = self.model.model.model.transformer.wte(input_ids)
+        input_embeds = self.model.model.transformer.wte(input_ids)  # DH: remove one '.model'
 
         # Baseline embeddings
         # Speaker indices are kept intact. The turns are fixed and we care about the gradient of the words
