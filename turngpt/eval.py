@@ -105,7 +105,7 @@ class TurnGPTEval(pl.LightningModule):
     def trp(self, input_ids, speaker_ids, output_attentions=False):
         # NOTE: The 'output_attentions' parameter was changed in transformers 3.x. Plz lock down to transformers version 2.5.1
         out = self.model(
-            input_ids, speaker_ids=speaker_ids, output_attentions=output_attentions
+            input_ids, speaker_ids=speaker_ids#, output_attentions=output_attentions
         )
         logits = out["logits"]
         prob = F.softmax(logits, dim=-1)

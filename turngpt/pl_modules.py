@@ -9,8 +9,8 @@ import pytorch_lightning as pl
 class TurnGPT(pl.LightningModule):
     def forward(self, input_ids, speaker_ids, **kwargs):
         """ labels are the the same as input_ids shift and padding fix inside model"""
-        print(self.model.__call__)
-        input()
+        #print(self.model.__call__)
+        #input()
         return self.model(input_ids, speaker_ids=speaker_ids, **kwargs)
         
 
