@@ -881,6 +881,9 @@ if __name__ == "__main__":
     makedirs(savepath, exist_ok=True)
 
     test_dataloader = get_dataloader(dm, args)
+    # DH:
+    print(">> Model, data ok; savepath:", savepath)
+    input(">> [1/1] Press any key to continue")
 
     if args.perplexity:
         # ce_loss, ppl = perplexity(model, dm, args)
@@ -940,10 +943,15 @@ if __name__ == "__main__":
         n_samples = 1000
         horizon = 41
         batch_size = 40
+        # turns = [
+        #     " yesterday we met in the park",
+        #     " okay when will you meet again",
+        #     " tomorrow",
+        #     "",
+        # ]
         turns = [
-            " yesterday we met in the park",
-            " okay when will you meet again",
-            " tomorrow",
+            " yesterday i met him in the park",
+            " he is so excited",
             "",
         ]
         input_ids, speaker_ids = turns_to_turngpt_tensors(
