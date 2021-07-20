@@ -440,8 +440,8 @@ class TurnGPTEval(pl.LightningModule):
             optim.zero_grad()
         grads = torch.cat(grads)
         predictions = torch.cat(predictions)
-        print(">> grads", grads, len(grads))
-        print(">> predictions", predictions, len(predictions))
+        print(">> grads", grads, grads.size())
+        print(">> predictions", predictions, predictions.size())
         input(">> press any key...")
 
         # Use trapezoidal rule to approximate the integral.
@@ -452,7 +452,12 @@ class TurnGPTEval(pl.LightningModule):
         with torch.no_grad():
             grads = (grads[:-1] + grads[1:]) / 2.0
             avg_grads = grads.mean(dim=0)
+            print(">> new grad:", grads, grads.size())
+            print(">> avg_grads:", avg_grads)
+            input(">> press any key...")
             integrated_gradients = diff_vector.cpu() * avg_grads  # shape: <inp.shape>
+            print(">> integrated_gradients:", integrated_gradients)
+            input(">> press any key...")
 
         # Check computation
         # ------------------------------------------------------------------------------------------------
@@ -529,8 +534,8 @@ class TurnGPTEval(pl.LightningModule):
 
             # get all turns in batch
             turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
-            print(">> turns:", turns[0].size(), turns[1].size() )
-            input(">> press any key...")
+            #print(">> turns:", turns[0].size(), turns[1].size() )
+            #input(">> press any key...")
 
             # Iterate over all the valid focus points and extract the attention over the context and current turn
             for i, b in enumerate(focus_bs):
