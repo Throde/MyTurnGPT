@@ -375,9 +375,14 @@ class TurnGPTEval(pl.LightningModule):
         # Device
         input_ids = input_ids.to(self.device)
         speaker_ids = speaker_ids.to(self.device)
+        print(">> input_ids", input_ids, input_ids.size())
+        print(">> speaker_ids", speaker_ids, speaker_ids.size())
+        input(">> press any key...")
 
         # Get input embeddings
         input_embeds = self.model.model.model.transformer.wte(input_ids)
+        print(">> input_embeds", input_embeds, input_embeds.size())
+        input(">> press any key...")
 
         # Baseline embeddings
         # Speaker indices are kept intact. The turns are fixed and we care about the gradient of the words
@@ -391,6 +396,8 @@ class TurnGPTEval(pl.LightningModule):
         baseline = self.model.model.model.transformer.wte(
             baseline_ids
         )  # get baseline embeddings
+        print(">> baseline", baseline, baseline.size())
+        input(">> press any key...")
 
         # Create the linear interpolation inputs, between actual input and baseline, for the IG algorithm
         interpolated_inputs = []
@@ -399,6 +406,8 @@ class TurnGPTEval(pl.LightningModule):
             for k in range(m):  # omit m+1 and add the actual input at the end
                 interpolated_inputs.append(baseline + float(k) / m * diff_vector)
         interpolated_inputs.append(input_embeds.detach())
+        print(">> interpolated_inputs", interpolated_inputs, len(interpolated_inputs))
+        input(">> press any key...")
 
         # Used to zero gradients
         optim = torch.optim.SGD(self.parameters(), lr=1)
@@ -431,6 +440,9 @@ class TurnGPTEval(pl.LightningModule):
             optim.zero_grad()
         grads = torch.cat(grads)
         predictions = torch.cat(predictions)
+        print(">> grads", grads, len(grads))
+        print(">> predictions", predictions, len(predictions))
+        input(">> press any key...")
 
         # Use trapezoidal rule to approximate the integral.
         # See Section 4 of the following paper for an accuracy comparison between
@@ -493,8 +505,8 @@ class TurnGPTEval(pl.LightningModule):
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
-            print(">> trp:", trp['trp'].size())
-            input(">> press any key...")
+            #print(">> trp:", trp['trp'].size())
+            #input(">> press any key...")
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
