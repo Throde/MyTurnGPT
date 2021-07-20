@@ -377,7 +377,7 @@ class TurnGPTEval(pl.LightningModule):
         speaker_ids = speaker_ids.to(self.device)
 
         # Get input embeddings
-        input_embeds = self.model.model.transformer.wte(input_ids)  # DH: remove one '.model'
+        input_embeds = self.model.model.model.transformer.wte(input_ids)
 
         # Baseline embeddings
         # Speaker indices are kept intact. The turns are fixed and we care about the gradient of the words
