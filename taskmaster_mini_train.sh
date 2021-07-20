@@ -5,13 +5,13 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N taskmaster_pretrained
+#$ -N taskmaster_mini
 #$ -cwd
-#$ -o log/taskmaster_out.log
-#$ -e log/taskmaster_err.log
+#$ -o log/taskmaster_mini_out.log
+#$ -e log/taskmaster_mini_err.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu 1
-#$ -l h_vmem=512G
+#$ -l h_vmem=256G
 
 # priority
 #$ -P lel_hcrc_cstr_students
