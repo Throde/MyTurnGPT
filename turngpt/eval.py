@@ -103,6 +103,7 @@ class TurnGPTEval(pl.LightningModule):
         print("pad_idx: ", self.pad_idx)
 
     def trp(self, input_ids, speaker_ids, output_attentions=False):
+        # NOTE: The 'output_attentions' parameter was changed in transformers 3.x. Plz lock down to transformers version 2.5.1
         out = self.model(
             input_ids, speaker_ids=speaker_ids, output_attentions=output_attentions
         )
