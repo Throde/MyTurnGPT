@@ -480,7 +480,7 @@ class TurnGPTEval(pl.LightningModule):
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        print(">> test_dataloader:",[item for item in test_dataloader))
+        print(">> test_dataloader:",[item for item in test_dataloader])
         input(">> press any key to continue")
         for batch in tqdm(test_dataloader, desc="Context IG"):
             print(">> batch:", batch, len(batch))
