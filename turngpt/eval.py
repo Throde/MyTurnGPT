@@ -1189,7 +1189,7 @@ if __name__ == "__main__":
         )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
         fig, ax = Plots.trp_sample(
-            trp, input_ids.cpu()
+            trp.cpu(), input_ids
         )
         fig.savefig(join(savepath, f"trp_sample.png"))
     
