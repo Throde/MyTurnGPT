@@ -611,7 +611,7 @@ class TurnGPTEval(pl.LightningModule):
 
     # DH: add
     def word_IG(
-        self, test_dataloader, prob_thresh=0.2, n_word=4, m=70, normalize=True
+        self, data_list, prob_thresh=0.2, n_word=4, m=70, normalize=True
     ):
         print("Calculating the IG for all valid turn-shift predictions")
         print("This function is very slow (forward/backward pass for each target focus)")
@@ -621,15 +621,15 @@ class TurnGPTEval(pl.LightningModule):
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        #print(">> test_dataloader:",[item for item in test_dataloader])
-        #input(">> press any key to continue")
-        for batch in tqdm(test_dataloader, desc="Context IG"):
-            #print(">> batch:", batch, len(batch))
-            #input(">> press any key...")
+        print(">> data_list:",[item for item in data_list])
+        input(">> press any key to continue")
+        for batch in tqdm(data_list, desc="Word IG"):
+            print(">> batch:", batch, len(batch))
+            input(">> press any key...")
             input_ids, speaker_ids = batch[0], batch[1]
-            #print(">> input_ids", input_ids, input_ids.size() )
-            #print(">> speaker_ids", speaker_ids, speaker_ids.size())
-            #input(">> press any key...")
+            print(">> input_ids", input_ids, input_ids.size() )
+            print(">> speaker_ids", speaker_ids, speaker_ids.size())
+            input(">> press any key...")
 
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
@@ -733,6 +733,10 @@ class TurnGPTEval(pl.LightningModule):
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
         return turn_context_ig
+
+    def get_trp(self, input_ids, speaker_ids):
+        out = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
+        return out["trp"]
 
     @torch.no_grad()
     def prediction_histogram(
@@ -859,8 +863,13 @@ class TurnGPTEval(pl.LightningModule):
             action="store_true",
             default=False,
         )
-        parser.add_argument(    # DH
+        parser.add_argument(    # added by DH
             "--word_ig",
+            action="store_true",
+            default=False,
+        )
+        parser.add_argument(    # added by DH
+            "--trp_sample",
             action="store_true",
             default=False,
         )
@@ -1153,6 +1162,7 @@ if __name__ == "__main__":
         )
         fig.savefig(join(savepath, f"pred_hist.png"))
 
+
     # DH NOTE: IG calculation is only available for pretrained model (not for mini).
     if args.context_ig:
         context_ig = evaluation_model.context_IG(
@@ -1166,18 +1176,47 @@ if __name__ == "__main__":
             context_ig,
             join(savepath, f"ig_{args.datasets}_{args.split}.pt"),
         )
-
-    if args.word_ig:
+    
+    # added by DH
+    if args.trp_sample:
         turns = [
             " yesterday we met in the park",
             " okay when will you meet again",
             " tomorrow",
             "",
         ]
-        input_ids, speaker_ids = turns_to_turngpt_tensors(
-            turns, dm.tokenizer, explicit_turn_shift=True
+        trp = evaluation_model.get_trp(input_ids, speaker_ids)
+        fig, ax = Plots.trp_sample(
+            trp, input_ids, ylim=[-0.5, 2]
         )
-        print(">> input_ids", input_ids, input_ids.size())
-        print(">> speaker_ids", speaker_ids, speaker_ids.size())
+        fig.savefig(join(savepath, f"trp_sample.png"))
+    
+    # added by DH
+    if args.word_ig:
+        turns_list = [
+            [
+                " yesterday we met in the park",
+                " okay when will you meet again",
+                " tomorrow",
+                "",
+            ], 
+            [
+                " yesterday i met him in the park",
+                " he is so excited",
+                "",
+            ],
+        ]
+        data_list = []
+        for turns in turns_list:
+            input_ids, speaker_ids = turns_to_turngpt_tensors(
+                turns, dm.tokenizer, explicit_turn_shift=True
+            )
+            data_list.append( [input_ids, speaker_ids] )
+            print(turns)
+            print(">> input_ids", input_ids, input_ids.size())
+            print(">> speaker_ids", speaker_ids, speaker_ids.size())
+        word_ig = evaluation_model.word_IG(
+            data_list, prob_thresh, n_word=4, m=70
+        )
 
     ans = input("end?")
