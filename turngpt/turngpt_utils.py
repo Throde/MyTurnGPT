@@ -147,6 +147,53 @@ def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
         focus_inds = torch.cat(focus_inds)
     return focus_bs, focus_inds
 
+# DH:
+def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
+    """get_focus_indices.
+
+    Gets focus-indices where the model assigns a likelihood over `prob_thresh` over locations prior to actual
+    turn-shifts. Makes sure that there is `n_context` turns prior to the current utterance. Returns the batch and
+    sequence indices.
+
+    :param input_ids:       torch.tensor, input tokens
+    :param speaker_ids:     torch.tensor, speaker tokens
+    :param prob_thresh:     float, probability threshold that defines "likely" turn-shifts
+    :param n_context:       int, number of context turns prior to the utterance where a turn-shift is likely
+
+    Returns:
+        focus_bs:           torch.tensor, batch of calculated focus indices
+        focus_inds:         torch.tensor, index of calculated focus indices
+    """
+
+    # Find prediction where actual turn-shifts are present in the data,
+    # keep only those predictions over a certain probaility threshold.
+    # i.e. moments where there should be a turn-shift prediction and
+    # the model assign a high likelihood for that being the case.
+    ts_bs, ts_inds = get_turn_shift_indices(input_ids, sp1_idx=sp1_idx, sp2_idx=sp2_idx)
+    positive_guesses = trp[(ts_bs, ts_inds)].cpu()
+    over_thresh = torch.where(positive_guesses >= prob_thresh)
+    possible_focus_bs = ts_bs[over_thresh]
+    possible_focus_inds = ts_inds[over_thresh]
+    print(">> IN FUNC: possible_focus_bs", possible_focus_bs)
+    print(">> IN FUNC: possible_focus_inds", possible_focus_inds)
+
+    # Keep the likely true-positives that have sufficient context
+    focus_bs = []
+    focus_inds = []
+    turns = get_turns(input_ids, sp1_idx, sp2_idx)
+    for b, t in enumerate(turns):
+        print(">> b, t", b, t)
+        input(">> press any key...")
+        if len(t) > n_context:
+            min_ind = t[n_context][0].item()
+            possible_focus = possible_focus_inds[possible_focus_bs == b]
+            tmp_focus_inds = possible_focus[possible_focus > min_ind]
+            focus_bs.append(torch.ones_like(tmp_focus_inds).fill_(b))
+            focus_inds.append(tmp_focus_inds)
+    if len(focus_bs) > 0:
+        focus_bs = torch.cat(focus_bs)
+        focus_inds = torch.cat(focus_inds)
+    return focus_bs, focus_inds
 
 def batch_to_context_ablation_batch(
     input_ids,

@@ -22,6 +22,7 @@ from turngpt.turngpt_utils import (
     batch_to_context_ablation_batch,
     turns_to_turngpt_tensors,
     get_focus_indices,
+    get_focus_indices_word, # DH
     get_turns,
     find_turn_context,
 )
@@ -621,29 +622,34 @@ class TurnGPTEval(pl.LightningModule):
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        print(">> data_list:",[item for item in data_list])
-        input(">> press any key to continue")
+        #print(">> data_list:",[item for item in data_list])
+        #input(">> press any key to continue")
         for batch in tqdm(data_list, desc="Word IG"):
-            print(">> batch:", batch, len(batch))
-            input(">> press any key...")
+            #print(">> batch:", batch, len(batch))
+            #input(">> press any key...")
             input_ids, speaker_ids = batch[0], batch[1]
             print(">> input_ids", input_ids, input_ids.size() )
             print(">> speaker_ids", speaker_ids, speaker_ids.size())
+            #input(">> press any key...")
+            
+            # get all turns in batch
+            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+            print(">> turns:", turns, [turn.size() for turn in turns] )
             input(">> press any key...")
 
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
-            #print(">> trp:", trp['trp'], trp['trp'].size())
-            #input(">> press any key...")
+            print(">> trp:", trp['trp'], trp['trp'].size())
+            input(">> press any key...")
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
-            focus_bs, focus_inds = get_focus_indices(
+            focus_bs, focus_inds = get_focus_indices_word(
                 trp["trp"],
                 input_ids,
                 prob_thresh=prob_thresh,
-                n_context=n_context,
+                n_context=n_word,
                 sp1_idx=self.sp1_idx,
                 sp2_idx=self.sp2_idx,
             )
@@ -655,11 +661,6 @@ class TurnGPTEval(pl.LightningModule):
             if len(focus_bs) == 0:
                 batch_skipped += 1
                 continue
-
-            # get all turns in batch
-            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
-            #print(">> turns:", turns, [turn.size() for turn in turns] )
-            #input(">> press any key...")
 
             # Iterate over all the valid focus points and extract the attention over the context and current turn
             for i, b in enumerate(focus_bs):
@@ -1188,6 +1189,7 @@ if __name__ == "__main__":
             turns, dm.tokenizer, explicit_turn_shift=True
         )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
+        print(">> trp:", trp)
         # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
         fig, ax = Plots.trp_sample(
             trp.cpu().detach().numpy()[0], input_ids
