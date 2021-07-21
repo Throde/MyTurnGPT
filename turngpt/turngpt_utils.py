@@ -31,7 +31,8 @@ def get_turns(input_ids, sp1_idx, sp2_idx):
     sp_b, sp_inds = get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx)
     turns = []
     for b in range(input_ids.shape[0]):
-        turns.append(sp_inds[sp_b == b].unfold(0, 2, 1))
+        # help tensor.unfold(): https://haxibiao.com/article/76966/
+        turns.append(sp_inds[sp_b == b].unfold(0, 2, 1))    # dim, size, step
     return turns
 
 
