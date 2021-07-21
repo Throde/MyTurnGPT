@@ -931,7 +931,7 @@ if __name__ == "__main__":
     test_dataloader = get_dataloader(dm, args)
     # DH:
     print(">> Model, data ok; savepath:", savepath)
-    input(">> [1/1] Press any key to continue")
+    #input(">> [1/1] Press any key to continue")
 
     if False:   # DH: to exclude computing perplexity and classification
         if args.perplexity:

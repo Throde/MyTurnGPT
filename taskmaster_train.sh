@@ -32,7 +32,7 @@ source activate slptorch
 # available datasets: taskmaster metalwoz multiwoz coached persona dailydialog
 # python hello.py
 python ./turngpt/main.py \
-  --model mini \
+  --model pretrained \
   --datasets taskmaster \
   --chunk_size 512 \
   --gpus 1 \
