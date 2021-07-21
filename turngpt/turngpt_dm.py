@@ -165,7 +165,7 @@ class TurnGPTDM(pl.LightningDataModule):
         parser.add_argument("--chunk_keep_length", type=int, default=20)
 
         parser.add_argument("--batch_size", type=int, default=4)
-        parser.add_argument("--num_workers", type=int, default=4)
+        parser.add_argument("--num_workers", type=int, default=1)#4)
         return parser
 
 
