@@ -1185,6 +1185,9 @@ if __name__ == "__main__":
             " tomorrow",
             "",
         ]
+        input_ids, speaker_ids = turns_to_turngpt_tensors(
+            turns, dm.tokenizer, explicit_turn_shift=True
+        )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
         fig, ax = Plots.trp_sample(
             trp, input_ids, ylim=[-0.5, 2]
