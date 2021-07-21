@@ -1188,8 +1188,9 @@ if __name__ == "__main__":
             turns, dm.tokenizer, explicit_turn_shift=True
         )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
+        # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
         fig, ax = Plots.trp_sample(
-            trp.cpu().detach(), input_ids
+            trp.cpu().detach().numpy()[0], input_ids
         )
         fig.savefig(join(savepath, f"trp_sample.png"))
     
