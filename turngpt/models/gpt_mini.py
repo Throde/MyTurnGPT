@@ -171,7 +171,7 @@ class GPT(nn.Module):
 
         # forward the GPT model
         # DH: add clone()
-        token_embeddings = self.tok_emb(idx)  # each index maps to a (learnable) vector
+        token_embeddings = self.tok_emb(idx.clone())  # each index maps to a (learnable) vector
         position_embeddings = self.pos_emb[
             :, :t, :
         ]  # each position maps to a (learnable) vector
