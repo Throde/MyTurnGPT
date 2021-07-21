@@ -103,6 +103,28 @@ def turns_to_turngpt_tensors(turns, tokenizer, explicit_turn_shift=True):
         torch.tensor(speaker_ids).unsqueeze(0),
     )
 
+# DH
+def turns_to_bpe_tokens(turns, tokenizer, explicit_turn_shift=True):
+    assert isinstance(turns, list), "turns must be a list of strings"
+    turns = [remove_punctuation_capitalization(text) for text in turns]
+    sp1_idx, sp2_idx = (
+        tokenizer.convert_tokens_to_ids("<speaker1>"),
+        tokenizer.convert_tokens_to_ids("<speaker2>"),
+    )
+    bpe_tokens = []
+    for i, t in enumerate(turns):
+        toks = tokenizer.encode(t)  # DH::DH
+        if i % 2 == 0:
+            cur_speaker = sp1_idx
+        else:
+            cur_speaker = sp2_idx
+        if explicit_turn_shift:
+            bpe_tokens.append(cur_speaker)
+        bpe_tokens += toks
+    return (
+        torch.tensor(input_ids).unsqueeze(0),
+        torch.tensor(speaker_ids).unsqueeze(0),
+    )
 
 def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
     """get_focus_indices.
