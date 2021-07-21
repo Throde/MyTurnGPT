@@ -1180,9 +1180,8 @@ if __name__ == "__main__":
     # added by DH
     if args.trp_sample:
         turns = [
-            " yesterday we met in the park",
-            " okay when will you meet again",
-            " tomorrow",
+            " yesterday i met him in the park",
+            " he is so excited",
             "",
         ]
         input_ids, speaker_ids = turns_to_turngpt_tensors(
@@ -1190,7 +1189,7 @@ if __name__ == "__main__":
         )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
         fig, ax = Plots.trp_sample(
-            trp, input_ids, ylim=[-0.5, 2]
+            trp, input_ids
         )
         fig.savefig(join(savepath, f"trp_sample.png"))
     
