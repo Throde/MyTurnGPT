@@ -1189,7 +1189,7 @@ if __name__ == "__main__":
         )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
         fig, ax = Plots.trp_sample(
-            trp, input_ids
+            trp, input_ids.cpu()
         )
         fig.savefig(join(savepath, f"trp_sample.png"))
     
@@ -1220,5 +1220,13 @@ if __name__ == "__main__":
         word_ig = evaluation_model.word_IG(
             data_list, prob_thresh, n_word=4, m=70
         )
+        # fig, ax = Plots.context_attention(
+        #     context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
+        # )
+        # fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png"))
+        # torch.save(
+        #     context_ig,
+        #     join(savepath, f"ig_{args.datasets}_{args.split}.pt"),
+        # )
 
     ans = input("end?")
