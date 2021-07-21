@@ -497,21 +497,21 @@ class TurnGPTEval(pl.LightningModule):
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        #print(">> test_dataloader:",[item for item in test_dataloader])
-        #input(">> press any key to continue")
+        print(">> test_dataloader:",[item for item in test_dataloader])
+        input(">> press any key to continue")
         for batch in tqdm(test_dataloader, desc="Context IG"):
-            #print(">> batch:", batch, len(batch))
-            #input(">> press any key...")
+            print(">> batch:", batch, len(batch))
+            input(">> press any key...")
             input_ids, speaker_ids = batch[0], batch[1]
-            #print(">> input_ids", input_ids, input_ids.size() )
-            #print(">> speaker_ids", speaker_ids, speaker_ids.size())
-            #input(">> press any key...")
+            print(">> input_ids", input_ids, input_ids.size() )
+            print(">> speaker_ids", speaker_ids, speaker_ids.size())
+            input(">> press any key...")
 
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
-            #print(">> trp:", trp['trp'].size())
-            #input(">> press any key...")
+            print(">> trp:", trp['trp'].size())
+            input(">> press any key...")
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
@@ -523,9 +523,9 @@ class TurnGPTEval(pl.LightningModule):
                 sp1_idx=self.sp1_idx,
                 sp2_idx=self.sp2_idx,
             )
-            #print(">> focus_bs", focus_bs, len(focus_bs) )
-            #print(">> focus_inds", focus_inds, len(focus_inds) )
-            #input(">> press any key...")
+            print(">> focus_bs", focus_bs, len(focus_bs) )
+            print(">> focus_inds", focus_inds, len(focus_inds) )
+            input(">> press any key...")
 
             # Skip batch if no suitable targets was found
             if len(focus_bs) == 0:
@@ -534,8 +534,8 @@ class TurnGPTEval(pl.LightningModule):
 
             # get all turns in batch
             turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
-            #print(">> turns:", turns[0].size(), turns[1].size() )
-            #input(">> press any key...")
+            print(">> turns:", turns[0].size(), turns[1].size() )
+            input(">> press any key...")
 
             # Iterate over all the valid focus points and extract the attention over the context and current turn
             for i, b in enumerate(focus_bs):
