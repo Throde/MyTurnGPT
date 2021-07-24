@@ -1195,18 +1195,18 @@ if __name__ == "__main__":
                 "",
             ],
         ]
-        for turns in turns_list:
+        for i, turns in enumerate(turns_list):
             input_ids, speaker_ids = turns_to_turngpt_tensors(
                 turns, dm.tokenizer, explicit_turn_shift=True
             )
-        trp = evaluation_model.get_trp(input_ids, speaker_ids)
-        print(">> trp:", trp)
-        print(">> input_ids:", input_ids.squeeze(0))
-        # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
-        fig, ax = Plots.trp_sample(
-            trp.cpu().detach().numpy()[0], [id_to_token(tens) for tens in input_ids.squeeze(0)]
-        )
-        fig.savefig(join(savepath, f"trp_sample.png"))
+            trp = evaluation_model.get_trp(input_ids, speaker_ids)
+            print(">> trp:", trp)
+            print(">> input_ids:", input_ids.squeeze(0))
+            # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
+            fig, ax = Plots.trp_sample(
+                trp.cpu().detach().numpy()[0], [id_to_token(tens) for tens in input_ids.squeeze(0)]
+            )
+            fig.savefig(join(savepath, f"trp_sample_{i}.png"))
     
     # added by DH
     if args.word_ig:
