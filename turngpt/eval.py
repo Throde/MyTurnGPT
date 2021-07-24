@@ -1131,6 +1131,7 @@ if __name__ == "__main__":
         n_samples = 1000
         horizon = 41
         batch_size = 40
+        # a space at the beginning of a sentence: https://huggingface.co/transformers/v3.3.1/model_doc/gpt2.html#transformers.GPT2Tokenizer
         # turns = [
         #     " yesterday we met in the park",
         #     " okay when will you meet again",
@@ -1181,8 +1182,9 @@ if __name__ == "__main__":
     # added by DH
     if args.trp_sample:
         turns = [
-            " yesterday i met him in the park",
-            " he is so excited",
+            " yesterday we met in the park",
+            " okay when will you meet again",
+            " tomorrow",
             "",
         ]
         input_ids, speaker_ids = turns_to_turngpt_tensors(
@@ -1190,9 +1192,10 @@ if __name__ == "__main__":
         )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
         print(">> trp:", trp)
+        print(">> input_ids:", input_ids.squeeze(0))
         # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
         fig, ax = Plots.trp_sample(
-            trp.cpu().detach().numpy()[0], input_ids
+            trp.cpu().detach().numpy()[0], input_ids.squeeze(0)
         )
         fig.savefig(join(savepath, f"trp_sample.png"))
     

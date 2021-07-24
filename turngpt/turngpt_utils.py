@@ -122,8 +122,7 @@ def turns_to_bpe_tokens(turns, tokenizer, explicit_turn_shift=True):
             bpe_tokens.append(cur_speaker)
         bpe_tokens += toks
     return (
-        torch.tensor(input_ids).unsqueeze(0),
-        torch.tensor(speaker_ids).unsqueeze(0),
+        torch.tensor(bpe_tokens).unsqueeze(0)
     )
 
 def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
