@@ -23,7 +23,7 @@ from turngpt.turngpt_utils import (
     turns_to_turngpt_tensors,
     get_focus_indices,
     get_focus_indices_word, # DH
-    id_to_token, # DH
+    input_ids_to_token, # DH
     get_turns,
     find_turn_context,
 )
@@ -1204,7 +1204,7 @@ if __name__ == "__main__":
             print(">> input_ids:", input_ids.squeeze(0))
             # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
             fig, ax = Plots.trp_sample(
-                trp.cpu().detach().numpy()[0], [id_to_token(tens, dm.tokenizer) for tens in input_ids.squeeze(0)]
+                trp.cpu().detach().numpy()[0], input_ids_to_token(input_ids, dm.tokenizer)
             )
             fig.savefig(join(savepath, f"trp_sample_{i}.png"))
     
