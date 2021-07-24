@@ -23,6 +23,7 @@ from turngpt.turngpt_utils import (
     turns_to_turngpt_tensors,
     get_focus_indices,
     get_focus_indices_word, # DH
+    id_to_token, # DH
     get_turns,
     find_turn_context,
 )
@@ -1181,21 +1182,29 @@ if __name__ == "__main__":
     
     # added by DH
     if args.trp_sample:
-        turns = [
-            " yesterday we met in the park",
-            " okay when will you meet again",
-            " tomorrow",
-            "",
+        turns_list = [
+            [
+                " yesterday we met in the park",
+                " okay when will you meet again",
+                " tomorrow",
+                "",
+            ], 
+            [
+                " yesterday i met him in the park",
+                " he is so excited",
+                "",
+            ],
         ]
-        input_ids, speaker_ids = turns_to_turngpt_tensors(
-            turns, dm.tokenizer, explicit_turn_shift=True
-        )
+        for turns in turns_list:
+            input_ids, speaker_ids = turns_to_turngpt_tensors(
+                turns, dm.tokenizer, explicit_turn_shift=True
+            )
         trp = evaluation_model.get_trp(input_ids, speaker_ids)
         print(">> trp:", trp)
         print(">> input_ids:", input_ids.squeeze(0))
         # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
         fig, ax = Plots.trp_sample(
-            trp.cpu().detach().numpy()[0], input_ids.squeeze(0)
+            trp.cpu().detach().numpy()[0], [id_to_token(tens) for tens in input_ids.squeeze(0)]
         )
         fig.savefig(join(savepath, f"trp_sample.png"))
     

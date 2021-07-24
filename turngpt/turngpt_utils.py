@@ -125,6 +125,13 @@ def turns_to_bpe_tokens(turns, tokenizer, explicit_turn_shift=True):
         torch.tensor(bpe_tokens).unsqueeze(0)
     )
 
+def id_to_token(id, tokenizer):
+    assert isinstance(id, torch.tensor), "id must be a Tensor"
+    id = id.item()
+    token = tokenizer.decode([id])
+    return token
+
+
 def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
     """get_focus_indices.
 
