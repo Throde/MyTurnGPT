@@ -1202,9 +1202,11 @@ if __name__ == "__main__":
             trp = evaluation_model.get_trp(input_ids, speaker_ids)
             print(">> trp:", trp)
             print(">> input_ids:", input_ids.squeeze(0))
+            full_string = input_ids_to_token(input_ids, dm.tokenizer)
+            input_tokens = [token for token in full_string.split() if token!=""]
             # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
             fig, ax = Plots.trp_sample(
-                trp.cpu().detach().numpy()[0], input_ids_to_token(input_ids, dm.tokenizer)
+                trp.cpu().detach().numpy()[0], input_tokens
             )
             fig.savefig(join(savepath, f"trp_sample_{i}.png"))
     
