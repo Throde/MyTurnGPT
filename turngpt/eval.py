@@ -1191,17 +1191,20 @@ if __name__ == "__main__":
             ], 
             [
                 " what do you want",
-                " i want the dog fetching the ball for me",
-                "",
+                " i want the dog to fetch the ball for me",
+                " why not do it yourself",
+                ""
             ],
             [
                 " what do you want",
                 " i want to have the dog fetch the ball for me",
+                " why not do it yourself"
                 "",
             ],
             [
                 " what do you want",
                 " i want to let the dog fetch the ball for me",
+                " why not do it yourself"
                 "",
             ],
         ]
