@@ -1190,8 +1190,18 @@ if __name__ == "__main__":
                 "",
             ], 
             [
-                " yesterday i met him in the park",
-                " he is so excited",
+                " i am so excited",
+                " what happened",
+                "",
+            ],
+            [
+                " i am too excited",
+                " what happened",
+                "",
+            ],
+            [
+                " i am really excited",
+                " what happened",
                 "",
             ],
         ]
