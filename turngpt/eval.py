@@ -1204,7 +1204,7 @@ if __name__ == "__main__":
             print(">> input_ids:", input_ids.squeeze(0))
             # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
             fig, ax = Plots.trp_sample(
-                trp.cpu().detach().numpy()[0], [id_to_token(tens) for tens in input_ids.squeeze(0)]
+                trp.cpu().detach().numpy()[0], [id_to_token(tens, dm.tokenizer) for tens in input_ids.squeeze(0)]
             )
             fig.savefig(join(savepath, f"trp_sample_{i}.png"))
     
