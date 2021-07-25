@@ -639,45 +639,45 @@ class TurnGPTEval(pl.LightningModule):
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
-            focus_bs, focus_inds = get_focus_indices_word(
-                trp["trp"],
-                input_ids,
-                prob_thresh=prob_thresh,
-                n_context=n_word,
-                sp1_idx=self.sp1_idx,
-                sp2_idx=self.sp2_idx,
-            )
+            # focus_bs, focus_inds = get_focus_indices_word(
+            #     trp["trp"],
+            #     input_ids,
+            #     prob_thresh=prob_thresh,
+            #     n_context=n_word,
+            #     sp1_idx=self.sp1_idx,
+            #     sp2_idx=self.sp2_idx,
+            # )
+            focus_bs, focus_inds = get_focus_n_tokens(input_ids, torch.Tensor([287]), n_token=2)
             print(">> focus_bs", focus_bs, len(focus_bs) )
             print(">> focus_inds", focus_inds, len(focus_inds) )
             input(">> press any key...")
 
             # get all turns in batch
-            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
-            print(">> turns:", turns, [turn.size() for turn in turns] )
-            input(">> press any key...")
+            # turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+            # print(">> turns:", turns, [turn.size() for turn in turns] )
+            # input(">> press any key...")
 
             # Skip batch if no suitable targets was found
             if len(focus_bs) == 0:
                 batch_skipped += 1
                 continue
 
-            get_focus_n_tokens(input_ids, torch.Tensor([287]), 2)
-
             # Extract the attention over the words of the focus point
             for i, b in enumerate(focus_bs):
                 # i, b: e.g. 0(index), 0(batch_num)
                 focus_index = focus_inds[i]
                 # focus_index: e.g. 15
-                tmp_turn_context = find_turn_context(focus_index, turns[b], n_word)
+                #tmp_turn_context = find_turn_context(focus_index, turns[b], n_word)
                 #print(">> focus_index:", focus_index)
                 #print(">> turns[b]:", turns[b])
-                print(">> tmp_turn_context:", tmp_turn_context)
-                input(">> press any key...")
+                #print(">> tmp_turn_context:", tmp_turn_context)
+                #input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
                 print("tmp", tmp_input, tmp_speaker)
+                input(">> press any key...")
                 # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
                 # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
 
