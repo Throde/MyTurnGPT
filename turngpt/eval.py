@@ -380,6 +380,7 @@ class TurnGPTEval(pl.LightningModule):
         speaker_ids = speaker_ids.to(self.device)
 
         # Get input embeddings
+        # wte: word token embeddings; wpe: word position embeddings
         input_embeds = self.model.model.model.transformer.wte(input_ids)
         #print(">> input_embeds", input_embeds, input_embeds.size())
         #input(">> press any key...")
@@ -659,7 +660,7 @@ class TurnGPTEval(pl.LightningModule):
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
                 focus_token = (
                     self.sp1_idx
-                    if tmp_speaker[focus_index] == self.sp2_idx
+                    if tmp_speaker[-1] == self.sp2_idx
                     else self.sp2_idx
                 )
 
@@ -1356,7 +1357,7 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig, word_ids = evaluation_model.focus_word_IG(
-            data_list, n_token=4, m=200 #70
+            data_list, n_token=4, m=120 #70
         )
         # represent result
         for i, ig in enumerate(word_ig):
