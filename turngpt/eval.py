@@ -1244,9 +1244,6 @@ if __name__ == "__main__":
                 turns, dm.tokenizer, explicit_turn_shift=True
             )
             data_list.append( [input_ids, speaker_ids] )
-            print(turns)
-            print(">> input_ids", input_ids, input_ids.size())
-            print(">> speaker_ids", speaker_ids, speaker_ids.size())
         word_ig = evaluation_model.word_IG(
             data_list, prob_thresh, n_word=4, m=70
         )

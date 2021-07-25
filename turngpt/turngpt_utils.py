@@ -20,10 +20,14 @@ def get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx):
 
 def get_turn_shift_indices(input_ids, sp1_idx, sp2_idx):
     ts_bs, ts_inds = get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx)
-    print(ts_bs, ts_inds)
-    ts_inds = ts_inds - 1  # turn-shift are
+    # ts_inds: e.g. tensor([0,7,14,16]) actual turn shifts (<speaker1> & <speaker2> positions in a sequence of tokens of a dialog) 
+    # ts_bs: e.g. tensor([0,0,0,0]) zero tensor of the same size
+    ts_inds = ts_inds - 1  # turn-shift are (DH: one move before <speaker1> & <speaker2> pos, actual end-of-turn pos)
+    # ts_inds: now becomes tensor([-1,6,13,15])
     ts_bs = ts_bs[ts_inds != -1]
+    # ts_bs: now becomes tensor([0,0,0]) the first one is removed
     ts_inds = ts_inds[ts_inds != -1]
+    # ts_inds: now becomes tensor([6,13,15])
     return (ts_bs, ts_inds)
 
 
@@ -104,7 +108,7 @@ def turns_to_turngpt_tensors(turns, tokenizer, explicit_turn_shift=True):
         torch.tensor(speaker_ids).unsqueeze(0),
     )
 
-# DH addition
+# DH addition (uncensored)
 def turns_to_bpe_tokens(turns, tokenizer, explicit_turn_shift=True):
     assert isinstance(turns, list), "turns must be a list of strings"
     turns = [remove_punctuation_capitalization(text) for text in turns]
@@ -200,8 +204,12 @@ def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_
     # i.e. moments where there should be a turn-shift prediction and
     # the model assign a high likelihood for that being the case.
     ts_bs, ts_inds = get_turn_shift_indices(input_ids, sp1_idx=sp1_idx, sp2_idx=sp2_idx)
+    print(ts_bs, ts_inds)
     positive_guesses = trp[(ts_bs, ts_inds)].cpu()
+    print("positive_guesses:", positive_guesses)
     over_thresh = torch.where(positive_guesses >= prob_thresh)
+    print("over_thresh", over_thresh)
+    input(">> press any key")
     possible_focus_bs = ts_bs[over_thresh]
     possible_focus_inds = ts_inds[over_thresh]
     print(">> IN FUNC: possible_focus_bs", possible_focus_bs)
