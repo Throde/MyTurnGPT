@@ -550,8 +550,8 @@ class TurnGPTEval(pl.LightningModule):
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
-                print(">> tmp_input:", tmp_input.size())
-                print(">> tmp_speaker:", tmp_speaker.size())
+                print(">> tmp_input:", tmp_input, tmp_input.size())
+                print(">> tmp_speaker:", tmp_speaker, tmp_speaker.size())
                 input()
 
                 # the relevant focus token is the opposite of the speaker at focus_index
