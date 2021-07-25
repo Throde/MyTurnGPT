@@ -204,16 +204,15 @@ def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_
     # i.e. moments where there should be a turn-shift prediction and
     # the model assign a high likelihood for that being the case.
     ts_bs, ts_inds = get_turn_shift_indices(input_ids, sp1_idx=sp1_idx, sp2_idx=sp2_idx)
-    print(ts_bs, ts_inds)
+    # ts_inds: e.g. tensor([6,13,15]) pos of end-of-turn
+    # ts_bs: e.g. tensor([0,0,0])
     positive_guesses = trp[(ts_bs, ts_inds)].cpu()
-    print("positive_guesses:", positive_guesses)
+    # positive_guesses: e.g. tensor([0.0134, 0.8431, 0.2133]) end-of-turn trps
     over_thresh = torch.where(positive_guesses >= prob_thresh)
-    print("over_thresh", over_thresh)
-    input(">> press any key")
+    # over_thresh: e.g. ( tensor([1, 2]), ) the first end-of-turn trp 0.0134 is lower than threshold
     possible_focus_bs = ts_bs[over_thresh]
     possible_focus_inds = ts_inds[over_thresh]
-    print(">> IN FUNC: possible_focus_bs", possible_focus_bs)
-    print(">> IN FUNC: possible_focus_inds", possible_focus_inds)
+    # possible_focus_inds: e.g. now becomes tensor([13, 15])
 
     # Keep the likely true-positives that have sufficient context
     focus_bs = []
@@ -221,13 +220,13 @@ def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_
     turns = get_turns(input_ids, sp1_idx, sp2_idx)
     for b, t in enumerate(turns):
         print(">> b, t", b, t)
-        input(">> press any key...")
         if len(t) > n_context:
             min_ind = t[n_context][0].item()
             possible_focus = possible_focus_inds[possible_focus_bs == b]
             tmp_focus_inds = possible_focus[possible_focus > min_ind]
             focus_bs.append(torch.ones_like(tmp_focus_inds).fill_(b))
             focus_inds.append(tmp_focus_inds)
+    print("focus_inds:", focus_inds)
     if len(focus_bs) > 0:
         focus_bs = torch.cat(focus_bs)
         focus_inds = torch.cat(focus_inds)

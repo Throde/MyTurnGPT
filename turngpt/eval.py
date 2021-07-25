@@ -1245,7 +1245,7 @@ if __name__ == "__main__":
             )
             data_list.append( [input_ids, speaker_ids] )
         word_ig = evaluation_model.word_IG(
-            data_list, prob_thresh, n_word=4, m=70
+            data_list, prob_thresh, n_word=2, m=70
         )
         # fig, ax = Plots.context_attention(
         #     context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
