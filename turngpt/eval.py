@@ -24,6 +24,7 @@ from turngpt.turngpt_utils import (
     get_focus_indices,
     get_focus_indices_word, # DH
     input_ids_to_token, # DH
+    get_focus_n_tokens, # DH
     get_turns,
     find_turn_context,
 )
@@ -455,11 +456,11 @@ class TurnGPTEval(pl.LightningModule):
             grads = (grads[:-1] + grads[1:]) / 2.0
             avg_grads = grads.mean(dim=0)
             #print(">> new grad:", grads, grads.size())
-            print(">> avg_grads:", avg_grads, avg_grads.size())
+            #print(">> avg_grads:", avg_grads, avg_grads.size())
             #input(">> press any key...")
             integrated_gradients = diff_vector.cpu() * avg_grads  # shape: <inp.shape>
-            print(">> integrated_gradients:", integrated_gradients, integrated_gradients.size())
-            input(">> press any key...")
+            #print(">> integrated_gradients:", integrated_gradients, integrated_gradients.size())
+            #input(">> press any key...")
 
         # Check computation
         # ------------------------------------------------------------------------------------------------
@@ -660,7 +661,9 @@ class TurnGPTEval(pl.LightningModule):
                 batch_skipped += 1
                 continue
 
-            # Iterate over all the valid focus points and extract the attention over the context and current turn
+            get_focus_n_tokens(input_ids, 287, 2)
+
+            # Extract the attention over the words of the focus point
             for i, b in enumerate(focus_bs):
                 # i, b: e.g. 0(index), 0(batch_num)
                 focus_index = focus_inds[i]
@@ -670,7 +673,7 @@ class TurnGPTEval(pl.LightningModule):
                 #print(">> turns[b]:", turns[b])
                 print(">> tmp_turn_context:", tmp_turn_context)
                 input(">> press any key...")
-
+                
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
@@ -715,6 +718,7 @@ class TurnGPTEval(pl.LightningModule):
                 # Iterate over all context (and current) turn and extract IG-sum for each turn
                 tmp_context_ig = []
                 for t in tmp_turn_context:
+                    # t: e.g. tensor([ 7, 14])
                     # Always omit speaker-tokens (they will have 0 IG by definition anyways)
                     tmp_context_ig.append(ig["ig"][0, t[0] + 1 : t[1]].sum())
                 #print(">> tmp_context_ig before", tmp_context_ig)
