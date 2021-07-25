@@ -20,6 +20,7 @@ def get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx):
 
 def get_turn_shift_indices(input_ids, sp1_idx, sp2_idx):
     ts_bs, ts_inds = get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx)
+    print(ts_bs, ts_inds)
     ts_inds = ts_inds - 1  # turn-shift are
     ts_bs = ts_bs[ts_inds != -1]
     ts_inds = ts_inds[ts_inds != -1]
@@ -103,7 +104,7 @@ def turns_to_turngpt_tensors(turns, tokenizer, explicit_turn_shift=True):
         torch.tensor(speaker_ids).unsqueeze(0),
     )
 
-# DH
+# DH addition
 def turns_to_bpe_tokens(turns, tokenizer, explicit_turn_shift=True):
     assert isinstance(turns, list), "turns must be a list of strings"
     turns = [remove_punctuation_capitalization(text) for text in turns]
@@ -125,6 +126,7 @@ def turns_to_bpe_tokens(turns, tokenizer, explicit_turn_shift=True):
         torch.tensor(bpe_tokens).unsqueeze(0)
     )
 
+# DH addition
 def input_ids_to_token(input_ids, tokenizer):
     assert isinstance(input_ids, torch.Tensor), "input_ids must be a Tensor"
     ints = [each.item() for each in input_ids.squeeze(0)]
@@ -153,6 +155,7 @@ def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
     # i.e. moments where there should be a turn-shift prediction and
     # the model assign a high likelihood for that being the case.
     ts_bs, ts_inds = get_turn_shift_indices(input_ids, sp1_idx=sp1_idx, sp2_idx=sp2_idx)
+    
     positive_guesses = trp[(ts_bs, ts_inds)].cpu()
     over_thresh = torch.where(positive_guesses >= prob_thresh)
     possible_focus_bs = ts_bs[over_thresh]
@@ -174,7 +177,7 @@ def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
         focus_inds = torch.cat(focus_inds)
     return focus_bs, focus_inds
 
-# DH:
+# DH addition
 def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
     """get_focus_indices.
 
