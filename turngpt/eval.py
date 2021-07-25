@@ -1356,18 +1356,19 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig, word_ids = evaluation_model.focus_word_IG(
-            data_list, n_token=5, m=200 #70
+            data_list, n_token=4, m=200 #70
         )
         # represent result
-        for i, res in enumerate(word_ig):
+        for i, ig in enumerate(word_ig):
             # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
             # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-            print(res)
+            print(ig)
             print(word_ids[i])
-            # fig, ax = Plots.context_attention(
-            #     context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
-            # )
-            # fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png"))
+            tokens = [dm.tokenizer.decode(tok_id) for tok_id in word_ids[i]]
+            fig, ax = Plots.context_attention(
+                ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
+            )
+            fig.savefig(join(savepath, f"custom_word_ig_{i}.png"))
         torch.save(
             word_ig,
             join(savepath, f"custom_word_ig.pt"),
