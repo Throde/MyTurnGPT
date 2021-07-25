@@ -378,10 +378,7 @@ class TurnGPTEval(pl.LightningModule):
         # Device
         input_ids = input_ids.to(self.device)
         speaker_ids = speaker_ids.to(self.device)
-        #print(">> input_ids", input_ids, input_ids.size())
-        #print(">> speaker_ids", speaker_ids, speaker_ids.size())
-        #input(">> press any key...")
-
+        
         # Get input embeddings
         input_embeds = self.model.model.model.transformer.wte(input_ids)
         #print(">> input_embeds", input_embeds, input_embeds.size())
@@ -437,6 +434,7 @@ class TurnGPTEval(pl.LightningModule):
             out = self.model.model.body_from_embedding(tmp_input_embeds, speaker_ids)
             lm_logits = self.model.model.model.lm_head(out["z"])
             probs = F.softmax(lm_logits, dim=-1)
+            print(">> probs", probs, probs.size())
             probs[:, focus_index, focus_token].backward()
             grads.append(tmp_input_embeds.grad.cpu())
             predictions.append(probs.detach().cpu())
