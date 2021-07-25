@@ -550,11 +550,12 @@ class TurnGPTEval(pl.LightningModule):
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
-                print(">> tmp_input:", tmp_input, tmp_input.size())
-                print(">> tmp_speaker:", tmp_speaker, tmp_speaker.size())
-                input()
+                # print(">> tmp_input:", tmp_input, tmp_input.size())
+                # print(">> tmp_speaker:", tmp_speaker, tmp_speaker.size())
+                # input()
 
                 # the relevant focus token is the opposite of the speaker at focus_index
+                # corresponds to shifting turn (prediction after the last word is another <speaker>)
                 focus_token = (
                     self.sp1_idx
                     if tmp_speaker[focus_index] == self.sp2_idx
@@ -580,7 +581,7 @@ class TurnGPTEval(pl.LightningModule):
                     return torch.stack(turn_context_ig)
                 print(">> ig.ig", ig['ig'])
                 print(">> ig.focus_prob", ig['focus_prob'])
-                print(">> ig.all_predictions", ig['all_predictions'])
+                #print(">> ig.all_predictions", ig['all_predictions'])
                 print(">> ig.error", ig['error'])
 
                 # Skip IG calculation with error larger than 5% which is recommended in the paper
@@ -672,20 +673,20 @@ class TurnGPTEval(pl.LightningModule):
                 #input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
-                tmp_input = input_ids[b, : focus_index]
-                tmp_speaker = speaker_ids[b, : focus_index]
-                print("tmp", tmp_input, tmp_speaker)
-                input(">> press any key...")
+                tmp_input = input_ids[b, : focus_index+1]
+                tmp_speaker = speaker_ids[b, : focus_index+1]
+                #print("tmp", tmp_input, tmp_speaker)
+                #input(">> press any key...")
                 # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
                 # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
 
                 # the relevant focus token is the opposite of the speaker at focus_index
-                # focus_token = (
-                #     self.sp1_idx
-                #     if tmp_speaker[focus_index] == self.sp2_idx
-                #     else self.sp2_idx
-                # )
-                focus_token = input_ids[b, focus_index].item()
+                # corresponds to shifting turn (prediction after the last word is another <speaker>)
+                focus_token = (
+                    self.sp1_idx
+                    if tmp_speaker[focus_index] == self.sp2_idx
+                    else self.sp2_idx
+                )
                 print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
@@ -706,7 +707,7 @@ class TurnGPTEval(pl.LightningModule):
                     return torch.stack(turn_context_ig)
                 print(">> ig.ig", ig['ig'])
                 print(">> ig.focus_prob", ig['focus_prob'])
-                print(">> ig.all_predictions", ig['all_predictions'])
+                #print(">> ig.all_predictions", ig['all_predictions'])
                 print(">> ig.error", ig['error'])
 
                 # Skip IG calculation with error larger than 5% which is recommended in the paper
