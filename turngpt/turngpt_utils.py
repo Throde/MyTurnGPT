@@ -237,7 +237,7 @@ def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_
     print("focus_inds:", focus_inds)
     return focus_bs, focus_inds
 
-def get_focus_n_tokens(input_ids, focus_id, n_token=5):
+def get_focus_n_tokens(input_ids, focus_id, n_token=4):
     """get_focus_n_tokens.
 
     Gets n tokens prior to focus_id token from input_ids. 

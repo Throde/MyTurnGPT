@@ -613,7 +613,7 @@ class TurnGPTEval(pl.LightningModule):
 
     # DH: add
     def focus_word_IG(
-        self, data_list, n_token=5, m=70, normalize=True
+        self, data_list, n_token=4, m=70, normalize=True
     ):
         print("Calculating the IG for turn-shift predictions of specific word in the turns")
         print("This function is very slow (forward/backward pass for each target focus)")
@@ -635,7 +635,7 @@ class TurnGPTEval(pl.LightningModule):
             # print(">> focus_inds", focus_inds, len(focus_inds) )
             # input(">> press any key...")
 
-            # Skip batch if no suitable targets was found
+            # Skip batch if no suitable targets was found (i.e. no enough words prior to focus point)
             if len(focus_bs) == 0:
                 batch_skipped += 1
                 continue
@@ -647,12 +647,13 @@ class TurnGPTEval(pl.LightningModule):
                 # focus_index: e.g. 15
 
                 # Only the past is relevant for the gradient computation
-                tmp_input = input_ids[b, : focus_index+1]
-                tmp_speaker = speaker_ids[b, : focus_index+1]
+                # keep only n_token tokens prior to and including the focus token
+                tmp_input = input_ids[b, focus_index-n_token : focus_index+1]
+                tmp_speaker = speaker_ids[b, focus_index-n_token : focus_index+1]
                 #print("tmp", tmp_input, tmp_speaker)
                 #input(">> press any key...")
-                # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
-                # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
+                # tmp_input: e.g. tensor([ 345, 1826, 757, 50257, 9439])
+                # tmp_speaker: e.g. tensor([ 50258, 50258, 50258, 50257, 50257])
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
