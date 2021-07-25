@@ -1340,7 +1340,7 @@ if __name__ == "__main__":
                 "",
             ],
         ]
-        focus_list = ["park", "dog"]
+        focus_list = [" park", " dog"]
         # prepare data
         data_list = []
         for i, turns in enumerate(turns_list):
