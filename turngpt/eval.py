@@ -619,7 +619,7 @@ class TurnGPTEval(pl.LightningModule):
         print("This function is very slow (forward/backward pass for each target focus)")
         #print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
 
-        turn_context_ig = []
+        turns_word_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
@@ -704,7 +704,7 @@ class TurnGPTEval(pl.LightningModule):
                         use_pbar=True,  # DH add pbar
                     )
                 except KeyboardInterrupt:
-                    return torch.stack(turn_context_ig)
+                    return torch.stack(turns_word_ig)
                 print(">> ig.ig", ig['ig'])
                 print(">> ig.focus_prob", ig['focus_prob'])
                 #print(">> ig.all_predictions", ig['all_predictions'])
@@ -717,7 +717,7 @@ class TurnGPTEval(pl.LightningModule):
 
                 # Iterate over all context (and current) turn and extract IG-sum for each turn
                 tmp_context_ig = []
-                for tok in ig["ig"]:
+                for tok in ig["ig"][0]: # ig is always of size [1, N, hidden_dim] (one batch one iteration)
                     print(tok)
                     tmp_context_ig.append(tok.sum())
                 #tmp_context_ig = ig["ig"][0, ]
@@ -733,14 +733,14 @@ class TurnGPTEval(pl.LightningModule):
                 # The gradient contribution should add up to 'focus_prob'
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
-                turn_context_ig.append(tmp_context_ig)
-                print(">> turn_context_ig", turn_context_ig)
+                turns_word_ig.append( [tmp_input, tmp_context_ig] )
+                print(">> turn_context_ig", turns_word_ig)
 
-        turn_context_ig = torch.stack(turn_context_ig)
-        print("Context attention samples: ", turn_context_ig.shape[0])
+        turns_word_ig = torch.stack(turns_word_ig)
+        print("Context attention samples: ", turns_word_ig.shape[0])
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
-        return turn_context_ig
+        return turns_word_ig
 
     def get_trp(self, input_ids, speaker_ids):
         out = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
