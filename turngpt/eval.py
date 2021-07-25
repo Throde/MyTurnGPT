@@ -626,8 +626,6 @@ class TurnGPTEval(pl.LightningModule):
         #input(">> press any key to continue")
         for batch in tqdm(data_list, desc="Word IG"):
             input_ids, speaker_ids, focus_id = batch[0], batch[1], batch[2]
-            # print(">> input_ids", input_ids, input_ids.size() )
-            # print(">> speaker_ids", speaker_ids, speaker_ids.size())
 
             focus_bs, focus_inds = get_focus_n_tokens(
                 input_ids, torch.Tensor([focus_id]), n_token=n_token
@@ -1354,7 +1352,7 @@ if __name__ == "__main__":
             print(">>", input_ids, focus_id)
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
-        word_ig = evaluation_model.word_IG(
+        word_ig = evaluation_model.focus_word_IG(
             data_list, n_word=5, m=70
         )
         # represent result
