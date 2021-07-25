@@ -1355,7 +1355,7 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig, word_ids = evaluation_model.focus_word_IG(
-            data_list, n_token=5, m=70
+            data_list, n_token=5, m=200 #70
         )
         # represent result
         for i, res in enumerate(word_ig):
