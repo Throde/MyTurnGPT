@@ -687,7 +687,7 @@ class TurnGPTEval(pl.LightningModule):
                 #     if tmp_speaker[focus_index] == self.sp2_idx
                 #     else self.sp2_idx
                 # )
-                focus_token = input_ids[b, : focus_index+1]
+                focus_token = input_ids[b, focus_index+1]
                 print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
