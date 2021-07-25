@@ -672,7 +672,7 @@ class TurnGPTEval(pl.LightningModule):
                     ig = self.integrated_gradient(
                         tmp_input.unsqueeze(0),  # unsqueeze batch dim
                         tmp_speaker.unsqueeze(0),  # unsqueeze batch dim
-                        focus_index=focus_index,
+                        focus_index=n_token,#focus_index,
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
