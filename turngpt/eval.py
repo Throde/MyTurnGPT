@@ -687,7 +687,7 @@ class TurnGPTEval(pl.LightningModule):
                 #     if tmp_speaker[focus_index] == self.sp2_idx
                 #     else self.sp2_idx
                 # )
-                focus_token = input_ids[b, focus_index+1]
+                focus_token = input_ids[b, focus_index].item()
                 print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
@@ -718,10 +718,14 @@ class TurnGPTEval(pl.LightningModule):
 
                 # Iterate over all context (and current) turn and extract IG-sum for each turn
                 tmp_context_ig = []
-                for t in tmp_turn_context:
+                for tok in ig["ig"]:
+                    print(tok)
+                    tmp_context_ig.append(tok.sum())
+                #tmp_context_ig = ig["ig"][0, ]
+                #for t in tmp_turn_context:
                     # t: e.g. tensor([ 7, 14])
                     # Always omit speaker-tokens (they will have 0 IG by definition anyways)
-                    tmp_context_ig.append(ig["ig"][0, t[0] + 1 : t[1]].sum())
+                #    tmp_context_ig.append(ig["ig"][0, t[0] + 1 : t[1]].sum())
                 #print(">> tmp_context_ig before", tmp_context_ig)
                 tmp_context_ig = torch.stack(tmp_context_ig).cpu()
                 print(">> tmp_context_ig", tmp_context_ig)
