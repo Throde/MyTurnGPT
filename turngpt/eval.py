@@ -1353,18 +1353,18 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig = evaluation_model.focus_word_IG(
-            data_list, n_word=5, m=70
+            data_list, n_token=5, m=70
         )
         # represent result
         for i, res in enumerate(word_ig):
             print(res)
-        # fig, ax = Plots.context_attention(
-        #     context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
-        # )
-        # fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png"))
-        # torch.save(
-        #     context_ig,
-        #     join(savepath, f"ig_{args.datasets}_{args.split}.pt"),
-        # )
+            # fig, ax = Plots.context_attention(
+            #     context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
+            # )
+            # fig.savefig(join(savepath, f"ig_{args.datasets}_{args.split}.png"))
+        torch.save(
+            word_ig,
+            join(savepath, f"custom_word_ig.pt"),
+        )
 
     ans = input("end?")
