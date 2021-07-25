@@ -1364,8 +1364,8 @@ if __name__ == "__main__":
             # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
             # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
             print(ig)
-            print(word_ids[i])
-            tokens = [dm.tokenizer.decode(tok_id) for tok_id in word_ids[i]]
+            tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
+            print(tokens)
             fig, ax = Plots.context_attention(
                 ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
             )
