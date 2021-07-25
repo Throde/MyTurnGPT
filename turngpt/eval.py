@@ -661,7 +661,7 @@ class TurnGPTEval(pl.LightningModule):
                 batch_skipped += 1
                 continue
 
-            get_focus_n_tokens(input_ids, 287, 2)
+            get_focus_n_tokens(input_ids, torch.Tensor([287]), 2)
 
             # Extract the attention over the words of the focus point
             for i, b in enumerate(focus_bs):
@@ -673,7 +673,7 @@ class TurnGPTEval(pl.LightningModule):
                 #print(">> turns[b]:", turns[b])
                 print(">> tmp_turn_context:", tmp_turn_context)
                 input(">> press any key...")
-                
+
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
