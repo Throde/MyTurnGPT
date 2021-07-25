@@ -627,22 +627,14 @@ class TurnGPTEval(pl.LightningModule):
         #input(">> press any key to continue")
         for batch in tqdm(data_list, desc="Word IG"):
             #print(">> batch:", batch, len(batch))
-            #input(">> press any key...")
             input_ids, speaker_ids = batch[0], batch[1]
             print(">> input_ids", input_ids, input_ids.size() )
             print(">> speaker_ids", speaker_ids, speaker_ids.size())
-            #input(">> press any key...")
-            
-            # get all turns in batch
-            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
-            print(">> turns:", turns, [turn.size() for turn in turns] )
-            input(">> press any key...")
 
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
             #print(">> trp:", trp['trp'], trp['trp'].size())
-            #input(">> press any key...")
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
@@ -654,9 +646,14 @@ class TurnGPTEval(pl.LightningModule):
                 sp1_idx=self.sp1_idx,
                 sp2_idx=self.sp2_idx,
             )
-            #print(">> focus_bs", focus_bs, len(focus_bs) )
-            #print(">> focus_inds", focus_inds, len(focus_inds) )
-            #input(">> press any key...")
+            print(">> focus_bs", focus_bs, len(focus_bs) )
+            print(">> focus_inds", focus_inds, len(focus_inds) )
+            input(">> press any key...")
+
+            # get all turns in batch
+            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+            print(">> turns:", turns, [turn.size() for turn in turns] )
+            input(">> press any key...")
 
             # Skip batch if no suitable targets was found
             if len(focus_bs) == 0:
@@ -665,20 +662,21 @@ class TurnGPTEval(pl.LightningModule):
 
             # Iterate over all the valid focus points and extract the attention over the context and current turn
             for i, b in enumerate(focus_bs):
-                #print(">> first item of focus_bs:", i, b)
-                #input(">> press any key...")
+                # i, b: e.g. 0(index), 0(batch_num)
                 focus_index = focus_inds[i]
-                tmp_turn_context = find_turn_context(focus_index, turns[b], n_context)
+                # focus_index: e.g. 15
+                tmp_turn_context = find_turn_context(focus_index, turns[b], n_word)
                 #print(">> focus_index:", focus_index)
                 #print(">> turns[b]:", turns[b])
-                #print(">> tmp_turn_context:", tmp_turn_context)
-                #input(">> press any key...")
+                print(">> tmp_turn_context:", tmp_turn_context)
+                input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
-                #print(">> tmp_input:", tmp_input.size())
-                #print(">> tmp_speaker:", tmp_speaker.size())
+                print("tmp", tmp_input, tmp_speaker)
+                # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
+                # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 focus_token = (
@@ -686,13 +684,13 @@ class TurnGPTEval(pl.LightningModule):
                     if tmp_speaker[focus_index] == self.sp2_idx
                     else self.sp2_idx
                 )
-                #print(">> focus_token", focus_token)
+                print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
                 # so we might want to interrupt it but still get some values back
                 try:
                     # ig.keys:  ['ig', 'focus_prob', 'all_predictions', 'error']
-                    # ig['ig']: (B, N, hidden_dim) e.g (1, 19, 768)
+                    # ig['ig']: (B, N, hidden_dim) e.g. (1, 19, 768)
                     ig = self.integrated_gradient(
                         tmp_input.unsqueeze(0),  # unsqueeze batch dim
                         tmp_speaker.unsqueeze(0),  # unsqueeze batch dim

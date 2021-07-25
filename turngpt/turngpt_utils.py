@@ -21,7 +21,7 @@ def get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx):
 def get_turn_shift_indices(input_ids, sp1_idx, sp2_idx):
     ts_bs, ts_inds = get_speaker_shift_indices(input_ids, sp1_idx, sp2_idx)
     # ts_inds: e.g. tensor([0,7,14,16]) actual turn shifts (<speaker1> & <speaker2> positions in a sequence of tokens of a dialog) 
-    # ts_bs: e.g. tensor([0,0,0,0]) zero tensor of the same size
+    # ts_bs: e.g. tensor([0,0,0,0]) zero/one/... tensor of the same size (indicating batch number)
     ts_inds = ts_inds - 1  # turn-shift are (DH: one move before <speaker1> & <speaker2> pos, actual end-of-turn pos)
     # ts_inds: now becomes tensor([-1,6,13,15])
     ts_bs = ts_bs[ts_inds != -1]
@@ -220,19 +220,21 @@ def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_
     turns = get_turns(input_ids, sp1_idx, sp2_idx)
     for b, t in enumerate(turns):
         # b: e.g. 0
-        # t: e.g. tensor([[ 0,  7], [ 7, 14], [14, 16]])
-        print(len(t))
+        # t: e.g. tensor([ 0,  7], [ 7, 14], [14, 16])
         if len(t) > n_context:
-            print()
             min_ind = t[n_context][0].item()
-            possible_focus = possible_focus_inds[possible_focus_bs == b]
+            # min_ind: e.g. 14 from [14, 16]
+            possible_focus = possible_focus_inds[possible_focus_bs == b]    # correct batch
+            # possible_focus: e.g. tensor([13, 15]) same as possible_focus_inds
             tmp_focus_inds = possible_focus[possible_focus > min_ind]
+            # tmp_focus_inds: e.g. tensor([15]) larger than 14
             focus_bs.append(torch.ones_like(tmp_focus_inds).fill_(b))
             focus_inds.append(tmp_focus_inds)
     print("focus_inds:", focus_inds)
     if len(focus_bs) > 0:
         focus_bs = torch.cat(focus_bs)
         focus_inds = torch.cat(focus_inds)
+    print("focus_inds:", focus_inds)
     return focus_bs, focus_inds
 
 def batch_to_context_ablation_batch(
