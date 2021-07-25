@@ -378,7 +378,7 @@ class TurnGPTEval(pl.LightningModule):
         # Device
         input_ids = input_ids.to(self.device)
         speaker_ids = speaker_ids.to(self.device)
-        
+
         # Get input embeddings
         input_embeds = self.model.model.model.transformer.wte(input_ids)
         #print(">> input_embeds", input_embeds, input_embeds.size())
@@ -434,7 +434,6 @@ class TurnGPTEval(pl.LightningModule):
             out = self.model.model.body_from_embedding(tmp_input_embeds, speaker_ids)
             lm_logits = self.model.model.model.lm_head(out["z"])
             probs = F.softmax(lm_logits, dim=-1)
-            print(">> probs", probs, probs.size())
             probs[:, focus_index, focus_token].backward()
             grads.append(tmp_input_embeds.grad.cpu())
             predictions.append(probs.detach().cpu())
@@ -551,8 +550,9 @@ class TurnGPTEval(pl.LightningModule):
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, : focus_index + 1]
                 tmp_speaker = speaker_ids[b, : focus_index + 1]
-                #print(">> tmp_input:", tmp_input.size())
-                #print(">> tmp_speaker:", tmp_speaker.size())
+                print(">> tmp_input:", tmp_input.size())
+                print(">> tmp_speaker:", tmp_speaker.size())
+                input()
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 focus_token = (
