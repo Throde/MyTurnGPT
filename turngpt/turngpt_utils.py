@@ -260,11 +260,10 @@ def get_focus_n_tokens(input_ids, focus_id, n_token=5):
         if len(input_b) > n_token:
             tgt_ind = torch.where(input_b==focus_id[b])
             print("tgt_ind", tgt_ind)
-            input(">> press any key")
-            # tgt_ind: e.g. tensor([4])
+            # tgt_ind: e.g. ( tensor([4]), )
             # focus: e.g. tensor([356, 1138]) if focus_id=287 and n_token=2
-            focus_inds.append( tgt_ind )
-            focus_bs.append( torch.ones_like(tgt_ind).fill_(b) )
+            focus_inds.append( tgt_ind[0] )
+            focus_bs.append( torch.ones_like(tgt_ind[0]).fill_(b) )
     if len(focus_bs) > 0:
         # e.g. turns [tensor([0, 0]), tensor(1, 1)] into tensor([0, 0, 1, 1])
         focus_bs = torch.cat(focus_bs)

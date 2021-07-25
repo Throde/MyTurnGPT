@@ -674,19 +674,20 @@ class TurnGPTEval(pl.LightningModule):
                 #input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
-                tmp_input = input_ids[b, : focus_index + 1]
-                tmp_speaker = speaker_ids[b, : focus_index + 1]
+                tmp_input = input_ids[b, : focus_index]
+                tmp_speaker = speaker_ids[b, : focus_index]
                 print("tmp", tmp_input, tmp_speaker)
                 input(">> press any key...")
                 # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
                 # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
 
                 # the relevant focus token is the opposite of the speaker at focus_index
-                focus_token = (
-                    self.sp1_idx
-                    if tmp_speaker[focus_index] == self.sp2_idx
-                    else self.sp2_idx
-                )
+                # focus_token = (
+                #     self.sp1_idx
+                #     if tmp_speaker[focus_index] == self.sp2_idx
+                #     else self.sp2_idx
+                # )
+                focus_token = input_ids[b, : focus_index+1]
                 print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
