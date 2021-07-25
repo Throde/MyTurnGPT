@@ -618,6 +618,7 @@ class TurnGPTEval(pl.LightningModule):
         print("Calculating the IG for turn-shift predictions of specific word in the turns")
         print("This function is very slow (forward/backward pass for each target focus)")
 
+        turns_word = []
         turns_word_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
@@ -697,14 +698,15 @@ class TurnGPTEval(pl.LightningModule):
                 # The gradient contribution should add up to 'focus_prob'
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
-                turns_word_ig.append( [tmp_input, tmp_context_ig] )
+                turns_word_ig.append( tmp_context_ig )
+                turns_word.append( tmp_input )
                 # print(">> turn_context_ig", turns_word_ig)
 
         turns_word_ig = torch.stack(turns_word_ig)
         print("Context attention samples: ", turns_word_ig.shape[0])
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
-        return turns_word_ig
+        return turns_word_ig, turns_word
     
     # DH: add
     def word_IG(
@@ -1352,12 +1354,15 @@ if __name__ == "__main__":
             print(">>", input_ids, focus_id)
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
-        word_ig = evaluation_model.focus_word_IG(
+        word_ig, word_ids = evaluation_model.focus_word_IG(
             data_list, n_token=5, m=70
         )
         # represent result
         for i, res in enumerate(word_ig):
+            # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
+            # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
             print(res)
+            print(word_ids[i])
             # fig, ax = Plots.context_attention(
             #     context_ig, ylim=[-0.5, 2], ylabel="IG", plot=args.plot
             # )
