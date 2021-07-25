@@ -219,8 +219,11 @@ def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_
     focus_inds = []
     turns = get_turns(input_ids, sp1_idx, sp2_idx)
     for b, t in enumerate(turns):
-        print(">> b, t", b, t)
+        # b: e.g. 0
+        # t: e.g. tensor([[ 0,  7], [ 7, 14], [14, 16]])
+        print(len(t))
         if len(t) > n_context:
+            print()
             min_ind = t[n_context][0].item()
             possible_focus = possible_focus_inds[possible_focus_bs == b]
             tmp_focus_inds = possible_focus[possible_focus > min_ind]

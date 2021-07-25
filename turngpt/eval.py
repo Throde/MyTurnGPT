@@ -641,8 +641,8 @@ class TurnGPTEval(pl.LightningModule):
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
-            print(">> trp:", trp['trp'], trp['trp'].size())
-            input(">> press any key...")
+            #print(">> trp:", trp['trp'], trp['trp'].size())
+            #input(">> press any key...")
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
