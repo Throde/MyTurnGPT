@@ -1359,6 +1359,7 @@ if __name__ == "__main__":
         word_ig, word_ids = evaluation_model.focus_word_IG(
             data_list, n_token=4, m=120 #70
         )
+        print(word_ig, word_ids)
         # represent result
         for i, ig in enumerate(word_ig):
             # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
