@@ -477,7 +477,7 @@ class TurnGPTEval(pl.LightningModule):
             error_perc = abs(round(diff * 100 / score_diff, 3))
 
         if use_pbar:
-            print(f"Error: {error_perc}%")
+            #print(f"Error: {error_perc}%")
             if error_perc >= 5:
                 print("Error is larger than 5%. Increase 'm'...")
         return {
@@ -682,6 +682,7 @@ class TurnGPTEval(pl.LightningModule):
 
                 # Skip IG calculation with error larger than 5% which is recommended in the paper
                 if ig["error"] >= 5:
+                    print(f"Warning: IG error {ig['error']}%")
                     error_skipped += 1
                     continue
 
@@ -702,7 +703,7 @@ class TurnGPTEval(pl.LightningModule):
                 # print(">> turn_context_ig", turns_word_ig)
 
         turns_word_ig = torch.stack(turns_word_ig)
-        print("Context attention samples: ", turns_word_ig.shape[0])
+        print("Word attention samples: ", turns_word_ig.shape[0])
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
         return turns_word_ig, turns_word
@@ -1336,7 +1337,13 @@ if __name__ == "__main__":
             ], 
             [
                 " what do you want",
-                " i want to let that brown dog fetch the ball for me",
+                " i want the brown dog to fetch the ball for me",
+                " why not do it yourself",
+                ""
+            ], 
+            [
+                " what do you want",
+                " i want to let the brown dog fetch the ball for me",
                 " why not do it yourself",
                 "",
             ],
@@ -1354,7 +1361,7 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig, word_ids = evaluation_model.focus_word_IG(
-            data_list, n_token=4, m=120 #70
+            data_list, n_token=5, m=120 #70
         )
         print(word_ig, word_ids)
         # represent result
