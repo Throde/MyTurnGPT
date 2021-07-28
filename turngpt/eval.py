@@ -648,9 +648,8 @@ class TurnGPTEval(pl.LightningModule):
                 # focus_index: e.g. 15
 
                 # Only the past is relevant for the gradient computation
-                # keep only n_token tokens prior to and including the focus token
-                tmp_input = input_ids[b, focus_index-n_token : focus_index+1]
-                tmp_speaker = speaker_ids[b, focus_index-n_token : focus_index+1]
+                tmp_input = input_ids[b, : focus_index+1]
+                tmp_speaker = speaker_ids[b, : focus_index+1]
                 #print("tmp", tmp_input, tmp_speaker)
                 #input(">> press any key...")
                 # tmp_input: e.g. tensor([ 345, 1826, 757, 50257, 9439])
@@ -672,7 +671,7 @@ class TurnGPTEval(pl.LightningModule):
                     ig = self.integrated_gradient(
                         tmp_input.unsqueeze(0),  # unsqueeze batch dim
                         tmp_speaker.unsqueeze(0),  # unsqueeze batch dim
-                        focus_index=n_token,#focus_index,
+                        focus_index=focus_index,
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
@@ -680,9 +679,6 @@ class TurnGPTEval(pl.LightningModule):
                     )
                 except KeyboardInterrupt:
                     return torch.stack(turns_word_ig)
-                # print(">> ig.ig", ig['ig'])
-                # print(">> ig.focus_prob", ig['focus_prob'])
-                # print(">> ig.error", ig['error'])
 
                 # Skip IG calculation with error larger than 5% which is recommended in the paper
                 if ig["error"] >= 5:
@@ -700,8 +696,9 @@ class TurnGPTEval(pl.LightningModule):
                 # The gradient contribution should add up to 'focus_prob'
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
-                turns_word_ig.append( tmp_context_ig )
-                turns_word.append( tmp_input )
+                # keep only n_token tokens prior to and including the focus token
+                turns_word_ig.append( tmp_context_ig[-n_token : ] )
+                turns_word.append( tmp_input[-n_token : ] )
                 # print(">> turn_context_ig", turns_word_ig)
 
         turns_word_ig = torch.stack(turns_word_ig)
