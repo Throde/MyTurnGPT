@@ -701,8 +701,9 @@ class TurnGPTEval(pl.LightningModule):
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
                 # keep only n_token tokens prior to and including the focus token
-                turns_word_ig.append( tmp_context_ig[-n_token : ] )
-                turns_word.append( tmp_input[-n_token : ] )
+                start_indx = -n_token if n_token<len(tmp_context_ig) else 0
+                turns_word_ig.append( tmp_context_ig[start_indx : ] )
+                turns_word.append( tmp_input[start_indx : ] )
                 # print(">> turn_context_ig", turns_word_ig)
 
         turns_word_ig = torch.stack(turns_word_ig)
@@ -1340,7 +1341,7 @@ if __name__ == "__main__":
             ], 
             [
                 " what do you want",
-                " i want that brown dog to go way",
+                " i want that brown dog to go away",
                 " fine",
                 ""
             ], 
@@ -1351,7 +1352,7 @@ if __name__ == "__main__":
                 "",
             ],
         ]
-        focus_list = [" park", " dog", " dog"]
+        focus_list = [" park", " away", " away"]
         # prepare data
         data_list = []
         for i, turns in enumerate(turns_list):
@@ -1364,7 +1365,7 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig, word_ids = evaluation_model.focus_word_IG(
-            data_list, n_token=5, m=120 #70
+            data_list, n_token=8, m=120 #70
         )
         # represent result
         for i, ig in enumerate(word_ig):
