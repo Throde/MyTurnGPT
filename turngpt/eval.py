@@ -112,7 +112,10 @@ class TurnGPTEval(pl.LightningModule):
         )
         logits = out["logits"]
         prob = F.softmax(logits, dim=-1)
+        # DH: get sp1_idx and sp2_idx values for each token
         prob = torch.stack((prob[..., self.sp1_idx], prob[..., self.sp2_idx]), dim=-1)
+        print("midprob",prob)
+        # DH: get the larger one between sp1_idx prob and sp2_idx prob as trp
         prob, _ = prob.max(dim=-1)
         ret = {"trp": prob}
         if output_attentions:
@@ -1367,9 +1370,9 @@ if __name__ == "__main__":
         for i, ig in enumerate(word_ig):
             # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
             # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-            print(ig)
+            print(">>", ig)
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-            print(tokens, word_ids)
+            print(">>", tokens, word_ids[i])
             fig, ax = Plots.context_attention(
                 ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
             )
