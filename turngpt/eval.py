@@ -114,7 +114,6 @@ class TurnGPTEval(pl.LightningModule):
         prob = F.softmax(logits, dim=-1)
         # DH: get sp1_idx and sp2_idx values for each token
         prob = torch.stack((prob[..., self.sp1_idx], prob[..., self.sp2_idx]), dim=-1)
-        print("midprob",prob)
         # DH: get the larger one between sp1_idx prob and sp2_idx prob as trp
         prob, _ = prob.max(dim=-1)
         ret = {"trp": prob}
@@ -1352,7 +1351,7 @@ if __name__ == "__main__":
                 "",
             ],
         ]
-        focus_list = [" park", " away", " away"]
+        focus_list = [" again", " away", " away"]
         # prepare data
         data_list = []
         for i, turns in enumerate(turns_list):
