@@ -1297,20 +1297,20 @@ if __name__ == "__main__":
             ], 
             [
                 " what do you want",
-                " i want that brown dog to fetch the ball for me",
-                " why not do it yourself",
+                " i want that brown dog to go away",
+                " fine",
                 ""
             ],
             [
                 " what do you want",
-                " i want to have that brown dog fetch the ball for me",
-                " why not do it yourself",
+                " i want to have that brown dog go away",
+                " fine",
                 "",
             ],
             [
                 " what do you want",
-                " i want to let that brown dog fetch the ball for me",
-                " why not do it yourself",
+                " i want to let that brown dog go away",
+                " fine",
                 "",
             ],
         ]
@@ -1340,14 +1340,14 @@ if __name__ == "__main__":
             ], 
             [
                 " what do you want",
-                " i want the brown dog to fetch the ball for me",
-                " why not do it yourself",
+                " i want that brown dog to go way",
+                " fine",
                 ""
             ], 
             [
                 " what do you want",
-                " i want to let the brown dog fetch the ball for me",
-                " why not do it yourself",
+                " i want to let that brown dog go away",
+                " fine",
                 "",
             ],
         ]
@@ -1372,7 +1372,7 @@ if __name__ == "__main__":
             # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
             print(">>", ig)
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-            print(">>", tokens, word_ids[i])
+            print(">>", tokens)#, word_ids[i])
             fig, ax = Plots.context_attention(
                 ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
             )
