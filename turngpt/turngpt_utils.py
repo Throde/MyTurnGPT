@@ -82,6 +82,17 @@ def find_turn_context(focus_index, turns, n_context):
             break
     return turns[n_turn - n_context : n_turn + 1]
 
+# DH addition
+def find_turn_with_index(focus_index, turns, n_token):
+    """
+    Finds in which turn `focus_index` is and returns the relevant turn
+    along with the context defined by `n_context`
+    """
+    for n_turn, (s, e) in enumerate(turns):
+        if s-1 < focus_index <= e-1:
+            break
+    return s, e
+
 
 def turns_to_turngpt_tensors(turns, tokenizer, explicit_turn_shift=True):
     assert isinstance(turns, list), "turns must be a list of strings"

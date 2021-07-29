@@ -25,6 +25,7 @@ from turngpt.turngpt_utils import (
     input_ids_to_token, # DH
     get_focus_n_tokens, # DH
     get_false_tokens, # DH
+    find_turn_with_index, # DH
     get_turns,
     find_turn_context,
 )
@@ -713,17 +714,18 @@ class TurnGPTEval(pl.LightningModule):
     
     # DH: add
     def false_word_IG(
-        self, test_dataloader, prob_thresh=0.2, n_word=4, m=70, normalize=True
+        self, test_dataloader, prob_thresh=0.2, n_token=4, m=70, normalize=True
     ):
         print("Calculating the IG for all valid turn-shift predictions")
         print("This function is very slow (forward/backward pass for each target focus)")
         #print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
 
+        turns_word = []
         false_word_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        for batch in tqdm(test_dataloader, desc="False Word IG"):
+        for batch in tqdm(test_dataloader[:2], desc="False Word IG"):
             input_ids, speaker_ids = batch[0], batch[1]
             #print(">> input_ids", input_ids, input_ids.size() )
             #print(">> speaker_ids", speaker_ids, speaker_ids.size())
@@ -739,16 +741,16 @@ class TurnGPTEval(pl.LightningModule):
                 trp["trp"], 
                 input_ids, 
                 prob_thresh=prob_thresh, 
-                n_token=n_word, 
+                n_token=n_token, 
                 sp1_idx=self.sp1_idx,
                 sp2_idx=self.sp2_idx
             )
-            print(">> focus_bs", focus_bs, len(focus_bs) )
-            print(">> focus_inds", focus_inds, len(focus_inds) )
-            input(">> press any key...")
+            # print(">> focus_bs", focus_bs, len(focus_bs) )
+            # print(">> focus_inds", focus_inds, len(focus_inds) )
+            # input(">> press any key...")
 
             # get all turns in batch
-            # turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
             # print(">> turns:", turns, [turn.size() for turn in turns] )
             # input(">> press any key...")
 
@@ -760,19 +762,19 @@ class TurnGPTEval(pl.LightningModule):
             # Extract the attention over the words of the focus point
             for i, b in enumerate(focus_bs):
                 # i, b: e.g. 0(index), 0(batch_num)
-                focus_index = focus_inds[i]
-                # focus_index: e.g. 15
-                #tmp_turn_context = find_turn_context(focus_index, turns[b], n_word)
+                false_index = focus_inds[i]
+                # false_index: e.g. 8
+                t_s, t_e = find_turn_with_index(false_index, turns[b], n_token)
                 #print(">> focus_index:", focus_index)
                 #print(">> turns[b]:", turns[b])
                 #print(">> tmp_turn_context:", tmp_turn_context)
                 #input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
-                tmp_input = input_ids[b, : focus_index+1]
-                tmp_speaker = speaker_ids[b, : focus_index+1]
-                #print("tmp", tmp_input, tmp_speaker)
-                #input(">> press any key...")
+                tmp_input = input_ids[b, t_s : false_index+1]
+                tmp_speaker = speaker_ids[b, t_s : false_index+1]
+                print("tmp", tmp_input, tmp_speaker)
+                input(">> press any key...")
                 # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
                 # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
 
@@ -780,7 +782,7 @@ class TurnGPTEval(pl.LightningModule):
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
                 focus_token = (
                     self.sp1_idx
-                    if tmp_speaker[focus_index] == self.sp2_idx
+                    if tmp_speaker[false_index] == self.sp2_idx
                     else self.sp2_idx
                 )
                 print(">> focus_token", focus_token)
@@ -793,14 +795,14 @@ class TurnGPTEval(pl.LightningModule):
                     ig = self.integrated_gradient(
                         tmp_input.unsqueeze(0),  # unsqueeze batch dim
                         tmp_speaker.unsqueeze(0),  # unsqueeze batch dim
-                        focus_index=focus_index,
+                        focus_index=false_index,
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
                         use_pbar=True,  # DH add pbar
                     )
                 except KeyboardInterrupt:
-                    return torch.stack(turns_word_ig)
+                    return torch.stack(false_word_ig)
                 print(">> ig.ig", ig['ig'])
                 print(">> ig.focus_prob", ig['focus_prob'])
                 #print(">> ig.all_predictions", ig['all_predictions'])
@@ -829,14 +831,17 @@ class TurnGPTEval(pl.LightningModule):
                 # The gradient contribution should add up to 'focus_prob'
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
-                turns_word_ig.append( [tmp_input, tmp_context_ig] )
-                print(">> turn_context_ig", turns_word_ig)
+                # keep only n_token tokens prior to and including the focus token
+                start_indx = -n_token if n_token<len(tmp_context_ig) else 0
+                false_word_ig.append( tmp_context_ig[start_indx : ] )
+                turns_word.append( tmp_input[start_indx : ] )
+                print(">> turn_context_ig", false_word_ig)
 
-        turns_word_ig = torch.stack(turns_word_ig)
-        print("Context attention samples: ", turns_word_ig.shape[0])
+        false_word_ig = torch.stack(false_word_ig)
+        print("Context attention samples: ", false_word_ig.shape[0])
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
-        return turns_word_ig
+        return false_word_ig
 
     def get_trp(self, input_ids, speaker_ids):
         out = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
