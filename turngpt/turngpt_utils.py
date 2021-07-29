@@ -228,14 +228,9 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
     false_inds = []
     for b in range(len(batch_num)):
         # b=0, 1, 2...batch num
-        # calculate start and end index for actual (ts) and guess (predict) inds_lists.
-        # ts_start = ts_batch_count[b-1].item() if b>0 else 0
-        # ts_end = ts_batch_count[b].item()
-        # predict_start = predict_batch_count[b-1].item() if b>0 else 0
-        # predict_end = predict_batch_count[b].item()
         ts_batch = ts_inds[ts_bs == b]
         predict_batch = predict_inds[predict_bs == b]
-        # tmp_inds = torch.cat([ts_inds[ts_start:ts_end], predict_inds[predict_start:predict_end]])
+        
         tmp_inds = torch.cat([ts_batch, predict_batch])
         uniset, count = tmp_inds.unique(return_counts=True)
         mask = (count == 1)
@@ -251,23 +246,6 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
     input(">> press any key...")
 
     return false_bs, false_inds
-
-    # Keep the likely true-positives that have sufficient token
-    focus_bs = []
-    focus_inds = []
-    turns = get_turns(input_ids, sp1_idx, sp2_idx)
-    for b, t in enumerate(turns):
-        # b: e.g. 0
-        # t: e.g. tensor([ 0,  7], [ 7, 14], [14, 16])
-        if len(t) > n_token:
-            min_ind = t[n_token][0].item()
-            # min_ind: e.g. 14 from [14, 16]
-            possible_focus = possible_focus_inds[possible_focus_bs == b]    # correct batch
-            # possible_focus: e.g. tensor([13, 15]) same as possible_focus_inds
-            tmp_focus_inds = possible_focus[possible_focus > min_ind]
-            # tmp_focus_inds: e.g. tensor([15]) larger than 14
-            focus_bs.append(torch.ones_like(tmp_focus_inds).fill_(b))
-            focus_inds.append(tmp_focus_inds)
 
 def get_focus_n_tokens(input_ids, focus_id, n_token=4):
     """get_focus_n_tokens.

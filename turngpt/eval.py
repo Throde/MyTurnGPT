@@ -725,7 +725,8 @@ class TurnGPTEval(pl.LightningModule):
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        for batch in tqdm(test_dataloader[:2], desc="False Word IG"):
+        ct = 0
+        for batch in tqdm(test_dataloader, desc="False Word IG"):
             input_ids, speaker_ids = batch[0], batch[1]
             #print(">> input_ids", input_ids, input_ids.size() )
             #print(">> speaker_ids", speaker_ids, speaker_ids.size())
@@ -836,6 +837,10 @@ class TurnGPTEval(pl.LightningModule):
                 false_word_ig.append( tmp_context_ig[start_indx : ] )
                 turns_word.append( tmp_input[start_indx : ] )
                 print(">> turn_context_ig", false_word_ig)
+
+                ct += 1
+                if ct>1:
+                    break
 
         false_word_ig = torch.stack(false_word_ig)
         print("Context attention samples: ", false_word_ig.shape[0])
