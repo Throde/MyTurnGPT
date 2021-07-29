@@ -221,7 +221,7 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
         ts_end = ts_batch_count[b].item()
         predict_start = predict_batch_count[b-1].item() if b>0 else 0
         predict_end = predict_batch_count[b].item()
-        tmp_inds = torch.cat([ts_inds[ts_start:ts_end], predict_inds[predict_start:predict_end]])
+        tmp_inds = torch.cat([ts_inds[ts_start:ts_end], predict_inds[predict_start:predict_end].cpu()])
         uniset, count = tmp_inds.unique(return_counts=True)
         mask = (count == 1)
         false_inds = uniset.masked_select(mask)
@@ -237,8 +237,6 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
 
     #positive_guesses = trp[(ts_bs, ts_inds)].cpu()
     # positive_guesses: e.g. tensor([0.0134, 0.8431, 0.2133]) end-of-turn trps
-    under_thresh = torch.where(positive_guesses < prob_thresh)
-    # over_thresh: e.g. ( tensor([1, 2]), ) the first end-of-turn trp 0.0134 is lower than threshold
     possible_focus_bs = ts_bs[under_thresh]
     possible_focus_inds = ts_inds[under_thresh]
     # possible_focus_inds: e.g. now becomes tensor([13, 15])
