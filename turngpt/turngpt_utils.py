@@ -182,47 +182,49 @@ def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
     return focus_bs, focus_inds
 
 # DH addition
-def get_focus_indices_word(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
+def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
     """get_focus_indices.
 
     Gets focus-indices where the model assigns a likelihood over `prob_thresh` over locations prior to actual
-    turn-shifts. Makes sure that there is `n_context` turns prior to the current utterance. Returns the batch and
+    turn-shifts. Makes sure that there is `n_token` turns prior to the current utterance. Returns the batch and
     sequence indices.
 
     :param input_ids:       torch.tensor, input tokens
     :param speaker_ids:     torch.tensor, speaker tokens
     :param prob_thresh:     float, probability threshold that defines "likely" turn-shifts
-    :param n_context:       int, number of context turns prior to the utterance where a turn-shift is likely
+    :param n_token:         int, number of token turns prior to the utterance where a turn-shift is likely
 
     Returns:
         focus_bs:           torch.tensor, batch of calculated focus indices
         focus_inds:         torch.tensor, index of calculated focus indices
     """
 
-    # Find prediction where actual turn-shifts are present in the data,
-    # keep only those predictions over a certain probaility threshold.
-    # i.e. moments where there should be a turn-shift prediction and
+    # Find false prediction where actual turn-shifts are not present in the data
+    # i.e. moments where there should not be a turn-shift prediction but
     # the model assign a high likelihood for that being the case.
     ts_bs, ts_inds = get_turn_shift_indices(input_ids, sp1_idx=sp1_idx, sp2_idx=sp2_idx)
     # ts_inds: e.g. tensor([6,13,15]) pos of end-of-turn
     # ts_bs: e.g. tensor([0,0,0])
-    positive_guesses = trp[(ts_bs, ts_inds)].cpu()
+    predict_trps = torch.where(trp >= prob_thresh)
+    print(">> predict_trps:", predict_trps)
+    input(">> press any key...")
+    #positive_guesses = trp[(ts_bs, ts_inds)].cpu()
     # positive_guesses: e.g. tensor([0.0134, 0.8431, 0.2133]) end-of-turn trps
-    over_thresh = torch.where(positive_guesses >= prob_thresh)
+    under_thresh = torch.where(positive_guesses < prob_thresh)
     # over_thresh: e.g. ( tensor([1, 2]), ) the first end-of-turn trp 0.0134 is lower than threshold
-    possible_focus_bs = ts_bs[over_thresh]
-    possible_focus_inds = ts_inds[over_thresh]
+    possible_focus_bs = ts_bs[under_thresh]
+    possible_focus_inds = ts_inds[under_thresh]
     # possible_focus_inds: e.g. now becomes tensor([13, 15])
 
-    # Keep the likely true-positives that have sufficient context
+    # Keep the likely true-positives that have sufficient token
     focus_bs = []
     focus_inds = []
     turns = get_turns(input_ids, sp1_idx, sp2_idx)
     for b, t in enumerate(turns):
         # b: e.g. 0
         # t: e.g. tensor([ 0,  7], [ 7, 14], [14, 16])
-        if len(t) > n_context:
-            min_ind = t[n_context][0].item()
+        if len(t) > n_token:
+            min_ind = t[n_token][0].item()
             # min_ind: e.g. 14 from [14, 16]
             possible_focus = possible_focus_inds[possible_focus_bs == b]    # correct batch
             # possible_focus: e.g. tensor([13, 15]) same as possible_focus_inds

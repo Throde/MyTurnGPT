@@ -22,9 +22,9 @@ from turngpt.turngpt_utils import (
     batch_to_context_ablation_batch,
     turns_to_turngpt_tensors,
     get_focus_indices,
-    get_focus_indices_word, # DH
     input_ids_to_token, # DH
     get_focus_n_tokens, # DH
+    get_false_tokens, # DH
     get_turns,
     find_turn_context,
 )
@@ -712,24 +712,21 @@ class TurnGPTEval(pl.LightningModule):
         return turns_word_ig, turns_word
     
     # DH: add
-    def word_IG(
-        self, data_list, prob_thresh=0.2, n_word=4, m=70, normalize=True
+    def false_word_IG(
+        self, test_dataloader, prob_thresh=0.2, n_word=4, m=70, normalize=True
     ):
         print("Calculating the IG for all valid turn-shift predictions")
         print("This function is very slow (forward/backward pass for each target focus)")
         #print("~10h on a single gtx1070 on a datasest (batch_size=4 and 503 batches)")
 
-        turns_word_ig = []
+        false_word_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
 
-        #print(">> data_list:",[item for item in data_list])
-        #input(">> press any key to continue")
-        for batch in tqdm(data_list, desc="Word IG"):
-            #print(">> batch:", batch, len(batch))
+        for batch in tqdm(test_dataloader, desc="False Word IG"):
             input_ids, speaker_ids = batch[0], batch[1]
-            print(">> input_ids", input_ids, input_ids.size() )
-            print(">> speaker_ids", speaker_ids, speaker_ids.size())
+            #print(">> input_ids", input_ids, input_ids.size() )
+            #print(">> speaker_ids", speaker_ids, speaker_ids.size())
 
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
@@ -738,15 +735,14 @@ class TurnGPTEval(pl.LightningModule):
 
             # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
             # with at least 'n_context' previous turns (history/context)
-            # focus_bs, focus_inds = get_focus_indices_word(
-            #     trp["trp"],
-            #     input_ids,
-            #     prob_thresh=prob_thresh,
-            #     n_context=n_word,
-            #     sp1_idx=self.sp1_idx,
-            #     sp2_idx=self.sp2_idx,
-            # )
-            focus_bs, focus_inds = get_focus_n_tokens(input_ids, torch.Tensor([287]), n_token=2)
+            focus_bs, focus_inds = get_false_tokens(
+                trp["trp"], 
+                input_ids, 
+                prob_thresh=prob_thresh, 
+                n_token=n_word, 
+                sp1_idx=self.sp1_idx,
+                sp2_idx=self.sp2_idx
+            )
             print(">> focus_bs", focus_bs, len(focus_bs) )
             print(">> focus_inds", focus_inds, len(focus_inds) )
             input(">> press any key...")
@@ -973,6 +969,11 @@ class TurnGPTEval(pl.LightningModule):
         )
         parser.add_argument(    # added by DH
             "--word_ig",
+            action="store_true",
+            default=False,
+        )
+        parser.add_argument(    # added by DH
+            "--false_word_ig",
             action="store_true",
             default=False,
         )
@@ -1354,6 +1355,41 @@ if __name__ == "__main__":
         focus_list = [" again", " away", " away"]
         # prepare data
         data_list = []
+        for i, turns in enumerate(turns_list):
+            input_ids, speaker_ids = turns_to_turngpt_tensors(
+                turns, dm.tokenizer, explicit_turn_shift=True
+            )
+            # specific: focus token id
+            focus_id = dm.tokenizer.encode(focus_list[i])
+            print(">>", input_ids, focus_id)
+            data_list.append( [input_ids, speaker_ids, focus_id] )
+        # compute ig
+        word_ig, word_ids = evaluation_model.focus_word_IG(
+            data_list, n_token=8, m=120 #70
+        )
+        # represent result
+        for i, ig in enumerate(word_ig):
+            # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
+            # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
+            print(">>", ig)
+            tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
+            print(">>", tokens)#, word_ids[i])
+            fig, ax = Plots.context_attention(
+                ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
+            )
+            fig.savefig(join(savepath, f"custom_word_ig_{i}.png"))
+        torch.save(
+            word_ig,
+            join(savepath, f"custom_word_ig.pt"),
+        )
+
+    # added by DH
+    if args.false_word_ig:
+        # prepare data
+        context_ig = evaluation_model.false_word_IG(
+            test_dataloader, prob_thresh, n_context, m=70
+        )
+
         for i, turns in enumerate(turns_list):
             input_ids, speaker_ids = turns_to_turngpt_tensors(
                 turns, dm.tokenizer, explicit_turn_shift=True
