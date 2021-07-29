@@ -783,7 +783,7 @@ class TurnGPTEval(pl.LightningModule):
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
                 focus_token = (
                     self.sp1_idx
-                    if tmp_speaker[false_index] == self.sp2_idx
+                    if tmp_speaker[false_index-t_s] == self.sp2_idx
                     else self.sp2_idx
                 )
                 print(">> focus_token", focus_token)
