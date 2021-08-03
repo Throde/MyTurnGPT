@@ -1176,6 +1176,8 @@ if __name__ == "__main__":
     model, dm, args = load()
 
     evaluation_model = TurnGPTEval(model, dm.tokenizer)
+    print(evaluation_model)
+    input(">> press any key...")
 
     if torch.cuda.is_available():
         evaluation_model = evaluation_model.to("cuda")
