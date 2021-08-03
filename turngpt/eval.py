@@ -778,11 +778,14 @@ class TurnGPTEval(pl.LightningModule):
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
-                focus_token = (
-                    self.sp1_idx
-                    if tmp_speaker[false_index-t_s] == self.sp2_idx
-                    else self.sp2_idx
-                )
+                try:
+                    focus_token = (
+                        self.sp1_idx
+                        if tmp_speaker[false_index-t_s] == self.sp2_idx
+                        else self.sp2_idx
+                    )
+                except:
+                    print(tmp_speaker, t_s, false_index)
                 #print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
@@ -797,7 +800,7 @@ class TurnGPTEval(pl.LightningModule):
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
-                        use_pbar=True,  # DH add pbar
+                        #use_pbar=True,  # DH add pbar
                     )
                 except KeyboardInterrupt:
                     return torch.stack(false_word_ig)

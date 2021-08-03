@@ -214,15 +214,14 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
     # i.e. moments where there should not be a turn-shift prediction but
     # the model assign a high likelihood for that being the case.
     ts_bs, ts_inds = get_turn_shift_indices(input_ids, sp1_idx=sp1_idx, sp2_idx=sp2_idx)
-    batch_num, ts_batch_count = ts_bs.unique(return_counts=True)
     #print(">>", ts_inds)
     # ts_inds: e.g. tensor([6,13,15]) pos of end-of-turn
     # ts_bs: e.g. tensor([0,0,0])
+    batch_num, _ = ts_bs.unique(return_counts=True)
     predict_bs, predict_inds = torch.where(trp.cpu() >= prob_thresh)
-    _, predict_batch_count = predict_bs.unique(return_counts=True)
-    #print(">> predict_trps:", predict_bs)   # tensor([0, 0, 0, 0, 0, 0, ..., 1, 1, 1, 1, 1, 1, 1])
-    #print(">>", predict_inds)   # tensor([  4,   8,  13,  19,  23,  27,  29,  ..., 495, 497, 501, 502, 510, 511])
-    #input(">> press any key...")
+    #print(">> predict_bs:", predict_bs)   # tensor([0, 0, 0, 0, 0, 0, ..., 1, 1, 1, 1, 1, 1, 1])
+    #print(">>", predict_inds)   # tensor([  4,  8,  13,  19,  23,  27,  29,  ..., 495, 497, 501, 502, 510, 511])
+    
     # get different indices from ts_inds and predict_inds
     false_bs = []
     false_inds = []
@@ -242,7 +241,7 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
         false_bs = torch.cat(false_bs)
         false_inds = torch.cat(false_inds)
     #print(">> false_inds:", false_inds)   # 
-    #print(">> false_inds:", false_bs)   # 
+    #print(">> false_bs:", false_bs)   # 
     #input(">> press any key...")
 
     return false_bs, false_inds
