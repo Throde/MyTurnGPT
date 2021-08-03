@@ -840,16 +840,18 @@ class TurnGPTEval(pl.LightningModule):
                 turns_word.append( tmp_input[start_indx : ] )
                 #print(">> turn_context_ig", false_word_ig)
 
-                ct += 1
-                if ct>=10:
-                    break
+            ct += 1
+            if ct==10:
+                print(ct)
+                input(">> ct=10")
+                break
 
-        false_word_ig = torch.stack(false_word_ig)
+        #false_word_ig = torch.stack(false_word_ig)
         print("Context attention samples: ", false_word_ig.shape[0])
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
         print("Skipped not_in_turn: ", not_in_turn_skipped) # DH
-        return false_word_ig
+        return false_word_ig, turns_word
 
     def get_trp(self, input_ids, speaker_ids):
         out = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
@@ -1424,6 +1426,7 @@ if __name__ == "__main__":
             print(">>", ig)
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             print(">>", tokens)#, word_ids[i])
+            print(">> -" * 20)
             # fig, ax = Plots.context_attention(
             #     ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
             # )
