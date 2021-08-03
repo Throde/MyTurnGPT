@@ -850,11 +850,11 @@ class TurnGPTEval(pl.LightningModule):
                 turns_word.append( tmp_input )
                 #print(">> turn_context_ig", false_word_ig)
 
-                ct += 1
-                if ct==5:
-                    break
-            if ct==5:
-                break
+            #     ct += 1
+            #     if ct==5:
+            #         break
+            # if ct==5:
+            #     break
 
         #false_word_ig = torch.stack(false_word_ig)
         print("Context attention samples: ", len(false_word_ig))
@@ -1449,4 +1449,4 @@ if __name__ == "__main__":
             print("-" * 20)
         save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig.txt"), )
 
-    ans = input("end?")
+    #ans = input("end?")

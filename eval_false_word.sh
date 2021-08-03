@@ -5,11 +5,11 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N eval
+#$ -N eval_false_word
 #$ -cwd
-#$ -o log/eval_out.log
-#$ -e log/eval_err.log
-#$ -l h_rt=12:00:00 
+#$ -o log/eval_false_word_out.log
+#$ -e log/eval_false_word_err.log
+#$ -l h_rt=24:00:00 
 #$ -pe gpu 1
 #$ -l h_vmem=256G
 
@@ -38,5 +38,4 @@ python ./turngpt/eval.py \
   --datasets maptask \
   --chunk_size 512 \
   --batch_size 2 \
-  --false_word_ig \
-  --true_word_ig
+  --false_word_ig
