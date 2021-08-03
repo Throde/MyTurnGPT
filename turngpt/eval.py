@@ -766,9 +766,8 @@ class TurnGPTEval(pl.LightningModule):
                 false_index = focus_inds[i]
                 # false_index: e.g. 8
                 t_s, t_e = find_turn_with_index(false_index, turns[b], n_token)
-                #print(">> focus_index:", focus_index)
+                #print(">> false_index:", false_index)
                 #print(">> turns[b]:", turns[b])
-                #print(">> tmp_turn_context:", tmp_turn_context)
                 #input(">> press any key...")
 
                 # Only the past is relevant for the gradient computation
@@ -796,7 +795,7 @@ class TurnGPTEval(pl.LightningModule):
                     ig = self.integrated_gradient(
                         tmp_input.unsqueeze(0),  # unsqueeze batch dim
                         tmp_speaker.unsqueeze(0),  # unsqueeze batch dim
-                        focus_index=false_index,
+                        focus_index=false_index-t_s,
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
