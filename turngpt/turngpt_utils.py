@@ -83,7 +83,7 @@ def find_turn_context(focus_index, turns, n_context):
     return turns[n_turn - n_context : n_turn + 1]
 
 # DH addition
-def find_turn_with_index(focus_index, turns, n_token):
+def find_turn_with_index(focus_index, turns):
     """
     Finds in which turn `focus_index` is and returns the relevant turn
     along with the context defined by `n_context`
@@ -194,18 +194,17 @@ def get_focus_indices(trp, input_ids, prob_thresh, n_context, sp1_idx, sp2_idx):
     return focus_bs, focus_inds
 
 # DH addition
-def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
+def get_false_tokens(trp, input_ids, prob_thresh, sp1_idx, sp2_idx):
     """get_focus_indices.
 
     Gets focus-indices where the model assigns a likelihood over `prob_thresh` over locations prior to actual
-    turn-shifts. Makes sure that there is `n_token` turns prior to the current utterance. Returns the batch and
+    turn-shifts. Returns the batch and
     sequence indices.
 
     :param input_ids:       torch.tensor, input tokens
     :param speaker_ids:     torch.tensor, speaker tokens
     :param prob_thresh:     float, probability threshold that defines "likely" turn-shifts
-    :param n_token:         int, number of token turns prior to the utterance where a turn-shift is likely
-
+    
     Returns:
         focus_bs:           torch.tensor, batch of calculated focus indices
         focus_inds:         torch.tensor, index of calculated focus indices
@@ -360,7 +359,10 @@ def save_txt(word_ig, word_ids, tokenizer, save_path):
         for i, ig in enumerate(word_ig):
             # e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
             # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-            f.write(ig.numpy().tolist())
+            ig_list = ig.numpy().tolist()
+            ig_str = ", ".join([str(x) for x in ig_list])
+            f.write(ig_str)
             tokens = [tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-            f.write(tokens)#, word_ids[i])
+            token_str = ", ".join(tokens)
+            f.write(token_str)#, word_ids[i])
             f.write("-" * 20)

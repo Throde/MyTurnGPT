@@ -744,7 +744,6 @@ class TurnGPTEval(pl.LightningModule):
                     trp["trp"], 
                     input_ids, 
                     prob_thresh=prob_thresh, 
-                    n_token=n_token, 
                     sp1_idx=self.sp1_idx,
                     sp2_idx=self.sp2_idx
                 )
@@ -777,7 +776,7 @@ class TurnGPTEval(pl.LightningModule):
                 # i, b: e.g. 0(index), 0(batch_num)
                 false_index = focus_inds[i]
                 # false_index: e.g. 8
-                t_s, t_e = find_turn_with_index(false_index, turns[b], n_token)
+                t_s, t_e = find_turn_with_index(false_index, turns[b])
                 if t_s==-1:
                     not_in_turn_skipped += 1
                     continue
@@ -846,13 +845,15 @@ class TurnGPTEval(pl.LightningModule):
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
                 # keep only n_token tokens prior to and including the focus token
-                start_indx = -n_token if n_token<len(tmp_context_ig) else 0
-                false_word_ig.append( tmp_context_ig[start_indx : ] )
-                turns_word.append( tmp_input[start_indx : ] )
+                #start_indx = -n_token if n_token<len(tmp_context_ig) else 0
+                false_word_ig.append( tmp_context_ig )
+                turns_word.append( tmp_input )
                 #print(">> turn_context_ig", false_word_ig)
 
-            ct += 1
-            if ct==1:
+                ct += 1
+                if ct==10:
+                    break
+            if ct==10:
                 break
 
         #false_word_ig = torch.stack(false_word_ig)
