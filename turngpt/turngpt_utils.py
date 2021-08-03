@@ -90,8 +90,9 @@ def find_turn_with_index(focus_index, turns, n_token):
     """
     for i, (s, e) in enumerate(turns):
         if s-1 < focus_index <= e-1:
-            break
-    return s, e
+            return s, e
+    # in case focus_index is not found in turns:
+    return -1, -1
 
 
 def turns_to_turngpt_tensors(turns, tokenizer, explicit_turn_shift=True):

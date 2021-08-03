@@ -724,6 +724,7 @@ class TurnGPTEval(pl.LightningModule):
         false_word_ig = []
         batch_skipped = 0  # n_batches skipped
         error_skipped = 0  # skipped due to IG calculation was over recommended error
+        not_in_turn_skipped = 0 # DH: skipped due to false token not found in turns
 
         ct = 0
         for batch in tqdm(test_dataloader, desc="False Word IG"):
@@ -766,6 +767,9 @@ class TurnGPTEval(pl.LightningModule):
                 false_index = focus_inds[i]
                 # false_index: e.g. 8
                 t_s, t_e = find_turn_with_index(false_index, turns[b], n_token)
+                if t_s==-1:
+                    not_in_turn_skipped += 1
+                    continue
                 #print(">> false_index:", false_index)
                 #print(">> turns[b]:", turns[b])
                 #input(">> press any key...")
@@ -778,18 +782,11 @@ class TurnGPTEval(pl.LightningModule):
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
-                try:
-                    focus_token = (
-                        self.sp1_idx
-                        if tmp_speaker[false_index-t_s] == self.sp2_idx
-                        else self.sp2_idx
-                    )
-                except:
-                    print(tmp_speaker, t_s, false_index)
-                    print(focus_inds, i)
-                    print(turns[b])
-                    input(">> press any key")
-                    continue
+                focus_token = (
+                    self.sp1_idx
+                    if tmp_speaker[false_index-t_s] == self.sp2_idx
+                    else self.sp2_idx
+                )
                 #print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
@@ -851,6 +848,7 @@ class TurnGPTEval(pl.LightningModule):
         print("Context attention samples: ", false_word_ig.shape[0])
         print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
+        print("Skipped not_in_turn: ", not_in_turn_skipped) # DH
         return false_word_ig
 
     def get_trp(self, input_ids, speaker_ids):
@@ -1426,10 +1424,10 @@ if __name__ == "__main__":
             print(">>", ig)
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             print(">>", tokens)#, word_ids[i])
-            fig, ax = Plots.context_attention(
-                ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
-            )
-            fig.savefig(join(savepath, f"custom_word_ig_{i}.png"))
+            # fig, ax = Plots.context_attention(
+            #     ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
+            # )
+            #fig.savefig(join(savepath, f"custom_word_ig_{i}.png"))
         torch.save(
             word_ig,
             join(savepath, f"custom_word_ig.pt"),
