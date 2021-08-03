@@ -247,6 +247,7 @@ def get_false_tokens(trp, input_ids, prob_thresh, n_token, sp1_idx, sp2_idx):
 
     return false_bs, false_inds
 
+
 def get_focus_n_tokens(input_ids, focus_id, n_token=4):
     """get_focus_n_tokens.
 
