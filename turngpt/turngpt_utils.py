@@ -361,8 +361,8 @@ def save_txt(word_ig, word_ids, tokenizer, save_path):
             # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
             ig_list = ig.numpy().tolist()
             ig_str = ", ".join([str(x) for x in ig_list])
-            f.write(ig_str)
+            f.write(ig_str + "\n")
             tokens = [tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             token_str = ", ".join(tokens)
-            f.write(token_str)#, word_ids[i])
-            f.write("-" * 20)
+            f.write(token_str + "\n")#, word_ids[i])
+            f.write("-" * 20 + "\n")

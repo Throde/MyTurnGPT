@@ -38,4 +38,5 @@ python ./turngpt/eval.py \
   --datasets maptask \
   --chunk_size 512 \
   --batch_size 2 \
-  --false_word_ig
+  --false_word_ig \
+  --true_word_ig
