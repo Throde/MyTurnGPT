@@ -773,10 +773,8 @@ class TurnGPTEval(pl.LightningModule):
                 # Only the past is relevant for the gradient computation
                 tmp_input = input_ids[b, t_s : false_index+1]
                 tmp_speaker = speaker_ids[b, t_s : false_index+1]
-                print("tmp", tmp_input, tmp_speaker)
-                input(">> press any key...")
-                # tmp_input: e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
-                # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257, 50257, 50258, 50258, 50258, 50258, 50258, 50258, 50258, 50257, 50257])
+                # tmp_input: e.g. tensor([50257,   523,   345,   821,  1016,   510])
+                # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257])
 
                 # the relevant focus token is the opposite of the speaker at focus_index
                 # corresponds to shifting turn (prediction after the last word is another <speaker>)
@@ -785,7 +783,7 @@ class TurnGPTEval(pl.LightningModule):
                     if tmp_speaker[false_index-t_s] == self.sp2_idx
                     else self.sp2_idx
                 )
-                print(">> focus_token", focus_token)
+                #print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
                 # so we might want to interrupt it but still get some values back
@@ -803,13 +801,14 @@ class TurnGPTEval(pl.LightningModule):
                     )
                 except KeyboardInterrupt:
                     return torch.stack(false_word_ig)
-                print(">> ig.ig", ig['ig'])
-                print(">> ig.focus_prob", ig['focus_prob'])
+                #print(">> ig.ig", ig['ig'])
+                #print(">> ig.focus_prob", ig['focus_prob'])
                 #print(">> ig.all_predictions", ig['all_predictions'])
-                print(">> ig.error", ig['error'])
+                #print(">> ig.error", ig['error'])
 
                 # Skip IG calculation with error larger than 5% which is recommended in the paper
                 if ig["error"] >= 5:
+                    print(">> large IG error: ", ig['error'])
                     error_skipped += 1
                     continue
 
@@ -825,7 +824,7 @@ class TurnGPTEval(pl.LightningModule):
                 #    tmp_context_ig.append(ig["ig"][0, t[0] + 1 : t[1]].sum())
                 #print(">> tmp_context_ig before", tmp_context_ig)
                 tmp_context_ig = torch.stack(tmp_context_ig).cpu()
-                print(">> tmp_context_ig", tmp_context_ig)
+                #print(">> tmp_context_ig", tmp_context_ig)
 
                 # Normalizes the IG values by the output probability of focus_index
                 # The gradient contribution should add up to 'focus_prob'
@@ -835,10 +834,10 @@ class TurnGPTEval(pl.LightningModule):
                 start_indx = -n_token if n_token<len(tmp_context_ig) else 0
                 false_word_ig.append( tmp_context_ig[start_indx : ] )
                 turns_word.append( tmp_input[start_indx : ] )
-                print(">> turn_context_ig", false_word_ig)
+                #print(">> turn_context_ig", false_word_ig)
 
                 ct += 1
-                if ct>1:
+                if ct>=10:
                     break
 
         false_word_ig = torch.stack(false_word_ig)
@@ -1176,8 +1175,8 @@ if __name__ == "__main__":
     model, dm, args = load()
 
     evaluation_model = TurnGPTEval(model, dm.tokenizer)
-    print(evaluation_model)
-    input(">> press any key...")
+    #print(evaluation_model)
+    #input(">> press any key...")
 
     if torch.cuda.is_available():
         evaluation_model = evaluation_model.to("cuda")
