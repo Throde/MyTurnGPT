@@ -1000,7 +1000,8 @@ class TurnGPTEval(pl.LightningModule):
             "--false_word_ig",
             action="store_true",
             default=False,
-        )parser.add_argument(    # added by DH
+        )
+        parser.add_argument(    # added by DH
             "--true_word_ig",
             action="store_true",
             default=False,
