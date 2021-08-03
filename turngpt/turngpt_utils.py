@@ -351,3 +351,15 @@ def batch_to_context_ablation_batch(
         "pos_indices": pos_indices,
         "neg_indices": neg_indices,
     }
+
+
+# DH: save to txt
+def save_txt(word_ig, word_ids, tokenizer, save_path):
+    with open(save_path, mode='w') as f:
+        for i, ig in enumerate(word_ig):
+            # e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
+            # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
+            f.write(ig.numpy().tolist())
+            tokens = [tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
+            f.write(tokens)#, word_ids[i])
+            f.write("-" * 20)

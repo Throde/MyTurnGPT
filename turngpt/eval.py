@@ -1,6 +1,7 @@
 from argparse import ArgumentParser
 import math
 import torch
+from torch.serialization import save
 from tqdm import tqdm
 from os.path import split, join
 from os import makedirs
@@ -28,6 +29,7 @@ from turngpt.turngpt_utils import (
     find_turn_with_index, # DH
     get_turns,
     find_turn_context,
+    save_txt, # DH
 )
 
 import matplotlib.pyplot as plt
@@ -841,9 +843,7 @@ class TurnGPTEval(pl.LightningModule):
                 #print(">> turn_context_ig", false_word_ig)
 
             ct += 1
-            if ct==10:
-                print(ct)
-                input(">> ct=10")
+            if ct==2:
                 break
 
         #false_word_ig = torch.stack(false_word_ig)
@@ -1431,9 +1431,10 @@ if __name__ == "__main__":
             #     ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
             # )
             #fig.savefig(join(savepath, f"custom_word_ig_{i}.png"))
-        torch.save(
-            word_ig,
-            join(savepath, f"custom_word_ig.pt"),
-        )
+        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"false_word_ig.txt"), )
+        #torch.save(
+        #    word_ig,
+        #    join(savepath, f"custom_word_ig.pt"),
+        #)
 
     ans = input("end?")
