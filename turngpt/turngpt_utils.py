@@ -88,7 +88,7 @@ def find_turn_with_index(focus_index, turns, n_token):
     Finds in which turn `focus_index` is and returns the relevant turn
     along with the context defined by `n_context`
     """
-    for n_turn, (s, e) in enumerate(turns):
+    for i, (s, e) in enumerate(turns):
         if s-1 < focus_index <= e-1:
             break
     return s, e

@@ -786,6 +786,10 @@ class TurnGPTEval(pl.LightningModule):
                     )
                 except:
                     print(tmp_speaker, t_s, false_index)
+                    print(focus_inds, i)
+                    print(turns[b])
+                    input(">> press any key")
+                    continue
                 #print(">> focus_token", focus_token)
 
                 # Using a try statement here because this whole function is so slow
@@ -800,7 +804,7 @@ class TurnGPTEval(pl.LightningModule):
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
-                        #use_pbar=True,  # DH add pbar
+                        use_pbar=True,  # DH add pbar
                     )
                 except KeyboardInterrupt:
                     return torch.stack(false_word_ig)
