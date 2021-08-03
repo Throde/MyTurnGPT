@@ -843,7 +843,7 @@ class TurnGPTEval(pl.LightningModule):
                 #print(">> turn_context_ig", false_word_ig)
 
             ct += 1
-            if ct==2:
+            if ct==3:
                 break
 
         #false_word_ig = torch.stack(false_word_ig)
