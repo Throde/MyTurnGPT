@@ -1367,7 +1367,7 @@ if __name__ == "__main__":
                 "",
             ],
         ]
-        focus_list = [" again", " dog", " dog", "dog"]
+        focus_list = [" again", " dog", " dog", " dog"]
         # prepare data
         data_list = []
         for i, turns in enumerate(turns_list):
