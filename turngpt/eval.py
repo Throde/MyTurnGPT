@@ -1128,14 +1128,17 @@ class Plots:
 
     @staticmethod
     def integrated_gradient(ig, tokens, focus, reduction=None, plot=False):
+        fig, ax = plt.subplots(1, 1)
         if reduction == "sum":
             i_g = ig.sum(dim=-1)
+            ax.bar(torch.arange(len(tokens)), i_g[0])
         elif reduction == "mean":
             i_g = ig.mean(dim=-1)
+            ax.bar(torch.arange(len(tokens)), i_g[0])
         else:
             i_g = ig  # DH: default is None
-        fig, ax = plt.subplots(1, 1)
-        ax.bar(torch.arange(len(tokens)), i_g[0])
+            print(i_g, i_g[0])
+            ax.bar(torch.arange(len(tokens)), i_g)
         y0, y1 = ax.get_ylim()
         ax.axvline(x=focus, ymin=y0, ymax=y1, c="r", alpha=0.5)
         ax.set_xticks(range(len(tokens)))
