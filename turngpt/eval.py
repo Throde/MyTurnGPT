@@ -726,9 +726,9 @@ class TurnGPTEval(pl.LightningModule):
 
         ct = 0
         for batch in tqdm(test_dataloader, desc="False Word IG"):
-            if ct<5:
-                ct += 1
-                continue
+            # if ct<5:
+            #     ct += 1
+            #     continue
             input_ids, speaker_ids = batch[0], batch[1]
             #print(">> input_ids", input_ids, input_ids.size() )
             #print(">> speaker_ids", speaker_ids, speaker_ids.size())
@@ -838,7 +838,7 @@ class TurnGPTEval(pl.LightningModule):
                 #print(">> false_word_ig", false_word_ig)
 
             ct += 1
-            if ct==7:
+            if ct==5:
                 break
 
         #false_word_ig = torch.stack(false_word_ig)
@@ -1137,10 +1137,9 @@ class Plots:
             ax.bar(torch.arange(len(tokens)), i_g[0])
         else:
             i_g = ig  # DH: default is None
-            print(i_g, i_g[0])
             ax.bar(torch.arange(len(tokens)), i_g)
         y0, y1 = ax.get_ylim()
-        ax.axvline(x=focus, ymin=y0, ymax=y1, c="r", alpha=0.5)
+        #ax.axvline(x=focus, ymin=y0, ymax=y1, c="r", alpha=0.5)
         ax.set_xticks(range(len(tokens)))
         ax.set_xticklabels(tokens, rotation=55)
         ax.set_ylabel("IG")
@@ -1416,7 +1415,7 @@ if __name__ == "__main__":
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             print(">>", tokens)#, word_ids[i])
             print("-" * 20)
-        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"false_word_ig.txt"), )
+        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"false_word_ig_2.txt"), )
 
     # added by DH
     if args.true_word_ig:
