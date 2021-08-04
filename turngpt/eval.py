@@ -772,7 +772,7 @@ class TurnGPTEval(pl.LightningModule):
                 continue
 
             # Extract the attention over the words of the focus point
-            for i, b in enumerate(focus_bs):
+            for i, b in enumerate(tqdm(focus_bs, desc="Batch")):
                 # i, b: e.g. 0(index), 0(batch_num)
                 false_index = focus_inds[i]
                 # false_index: e.g. 8
@@ -811,7 +811,7 @@ class TurnGPTEval(pl.LightningModule):
                         focus_token=focus_token,
                         m=m,
                         baseline_idx=self.pad_idx,
-                        use_pbar=True,  # DH add pbar
+                        #use_pbar=True,  # DH add pbar
                     )
                 except KeyboardInterrupt:
                     return torch.stack(false_word_ig)
@@ -848,13 +848,11 @@ class TurnGPTEval(pl.LightningModule):
                 #start_indx = -n_token if n_token<len(tmp_context_ig) else 0
                 false_word_ig.append( tmp_context_ig )
                 turns_word.append( tmp_input )
-                #print(">> turn_context_ig", false_word_ig)
+                #print(">> false_word_ig", false_word_ig)
 
-            #     ct += 1
-            #     if ct==5:
-            #         break
-            # if ct==5:
-            #     break
+            ct += 1
+            if ct==2:
+                break
 
         #false_word_ig = torch.stack(false_word_ig)
         print("Context attention samples: ", len(false_word_ig))
@@ -1447,6 +1445,6 @@ if __name__ == "__main__":
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             print(">>", tokens)#, word_ids[i])
             print("-" * 20)
-        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig.txt"), )
+        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig_2.txt"), )
 
     #ans = input("end?")
