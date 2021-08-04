@@ -1404,7 +1404,7 @@ if __name__ == "__main__":
     if args.false_word_ig:
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
-            test_dataloader, prob_thresh, n_context, m=120, actual_end=False
+            test_dataloader, prob_thresh, m=120, actual_end=False
         )
 
         # represent result
@@ -1421,7 +1421,7 @@ if __name__ == "__main__":
     if args.true_word_ig:
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
-            test_dataloader, prob_thresh, n_context, m=120, actual_end=True
+            test_dataloader, prob_thresh, m=120, actual_end=True
         )
 
         # represent result
