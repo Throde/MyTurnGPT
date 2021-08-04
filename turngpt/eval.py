@@ -729,6 +729,9 @@ class TurnGPTEval(pl.LightningModule):
 
         ct = 0
         for batch in tqdm(test_dataloader, desc="False Word IG"):
+            if ct<2:
+                ct += 1
+                continue
             input_ids, speaker_ids = batch[0], batch[1]
             #print(">> input_ids", input_ids, input_ids.size() )
             #print(">> speaker_ids", speaker_ids, speaker_ids.size())
@@ -851,7 +854,7 @@ class TurnGPTEval(pl.LightningModule):
                 #print(">> false_word_ig", false_word_ig)
 
             ct += 1
-            if ct==2:
+            if ct==5:
                 break
 
         #false_word_ig = torch.stack(false_word_ig)
