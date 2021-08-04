@@ -619,7 +619,7 @@ class TurnGPTEval(pl.LightningModule):
 
     # DH: add
     def focus_word_IG(
-        self, data_list, n_token=4, m=70, normalize=True
+        self, data_list, m=70, normalize=True
     ):
         print("Calculating the IG for turn-shift predictions of specific word in the turns")
         print("This function is very slow (forward/backward pass for each target focus)")
@@ -635,7 +635,7 @@ class TurnGPTEval(pl.LightningModule):
             input_ids, speaker_ids, focus_id = batch[0], batch[1], batch[2]
 
             focus_bs, focus_inds = get_focus_n_tokens(
-                input_ids, torch.Tensor([focus_id]), n_token=n_token
+                input_ids, torch.Tensor([focus_id]), 
             )
             # print(">> focus_bs", focus_bs, len(focus_bs) )
             # print(">> focus_inds", focus_inds, len(focus_inds) )
@@ -703,20 +703,17 @@ class TurnGPTEval(pl.LightningModule):
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
                 # keep only n_token tokens prior to and including the focus token
-                start_indx = -n_token if n_token<len(tmp_context_ig) else 0
-                turns_word_ig.append( tmp_context_ig[start_indx : ] )
-                turns_word.append( tmp_input[start_indx : ] )
+                #start_indx = -n_token if n_token<len(tmp_context_ig) else 0
+                turns_word_ig.append( tmp_context_ig )
+                turns_word.append( tmp_input )
                 # print(">> turn_context_ig", turns_word_ig)
 
-        turns_word_ig = torch.stack(turns_word_ig)
-        print("Word attention samples: ", turns_word_ig.shape[0])
-        print("Skipped batches: ", batch_skipped)
         print("Skipped error: ", error_skipped)
         return turns_word_ig, turns_word
     
     # DH: add
     def word_IG(
-        self, test_dataloader, prob_thresh=0.2, n_token=4, m=70, normalize=True, actual_end=False,
+        self, test_dataloader, prob_thresh=0.2, m=70, normalize=True, actual_end=False,
     ):
         print("Calculating the IG for all valid turn-shift predictions")
         print("This function is very slow (forward/backward pass for each target focus)")
@@ -729,7 +726,7 @@ class TurnGPTEval(pl.LightningModule):
 
         ct = 0
         for batch in tqdm(test_dataloader, desc="False Word IG"):
-            if ct<2:
+            if ct<5:
                 ct += 1
                 continue
             input_ids, speaker_ids = batch[0], batch[1]
@@ -739,7 +736,6 @@ class TurnGPTEval(pl.LightningModule):
             # Get likelihood over trp / turn-shifts over batch 
             # (DH: tensors are copied to GPU device, and computations are done there)
             trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
-            #print(">> trp:", trp['trp'], trp['trp'].size())
 
             if not actual_end:
                 # Get the points where the model makes incorrect predictions between trp & 'prob_thresh'
@@ -762,12 +758,9 @@ class TurnGPTEval(pl.LightningModule):
                 )
             # print(">> focus_bs", focus_bs, len(focus_bs) )
             # print(">> focus_inds", focus_inds, len(focus_inds) )
-            # input(">> press any key...")
 
             # get all turns in batch
             turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
-            # print(">> turns:", turns, [turn.size() for turn in turns] )
-            # input(">> press any key...")
 
             # Skip batch if no suitable targets was found
             if len(focus_bs) == 0:
@@ -820,8 +813,6 @@ class TurnGPTEval(pl.LightningModule):
                     return torch.stack(false_word_ig)
                 #print(">> ig.ig", ig['ig'])
                 #print(">> ig.focus_prob", ig['focus_prob'])
-                #print(">> ig.all_predictions", ig['all_predictions'])
-                #print(">> ig.error", ig['error'])
 
                 # Skip IG calculation with error larger than 5% which is recommended in the paper
                 if ig["error"] >= 5:
@@ -834,12 +825,6 @@ class TurnGPTEval(pl.LightningModule):
                 for tok in ig["ig"][0]: # ig is always of size [1, N, hidden_dim] (one batch one iteration)
                     #print(tok)
                     tmp_context_ig.append(tok.sum())
-                #tmp_context_ig = ig["ig"][0, ]
-                #for t in tmp_turn_context:
-                    # t: e.g. tensor([ 7, 14])
-                    # Always omit speaker-tokens (they will have 0 IG by definition anyways)
-                #    tmp_context_ig.append(ig["ig"][0, t[0] + 1 : t[1]].sum())
-                #print(">> tmp_context_ig before", tmp_context_ig)
                 tmp_context_ig = torch.stack(tmp_context_ig).cpu()
                 #print(">> tmp_context_ig", tmp_context_ig)
 
@@ -848,13 +833,12 @@ class TurnGPTEval(pl.LightningModule):
                 if normalize:
                     tmp_context_ig /= ig["focus_prob"]
                 # keep only n_token tokens prior to and including the focus token
-                #start_indx = -n_token if n_token<len(tmp_context_ig) else 0
                 false_word_ig.append( tmp_context_ig )
                 turns_word.append( tmp_input )
                 #print(">> false_word_ig", false_word_ig)
 
             ct += 1
-            if ct==5:
+            if ct==7:
                 break
 
         #false_word_ig = torch.stack(false_word_ig)
@@ -1143,13 +1127,13 @@ class Plots:
         return fig, ax
 
     @staticmethod
-    def integrated_gradient(ig, tokens, focus, reduction="sum", plot=False):
+    def integrated_gradient(ig, tokens, focus, reduction=None, plot=False):
         if reduction == "sum":
             i_g = ig.sum(dim=-1)
         elif reduction == "mean":
             i_g = ig.mean(dim=-1)
         else:
-            i_g = ig.sum(dim=-1)  # sum is default
+            i_g = ig  # DH: default is None
         fig, ax = plt.subplots(1, 1)
         ax.bar(torch.arange(len(tokens)), i_g[0])
         y0, y1 = ax.get_ylim()
@@ -1198,8 +1182,6 @@ if __name__ == "__main__":
     model, dm, args = load()
 
     evaluation_model = TurnGPTEval(model, dm.tokenizer)
-    #print(evaluation_model)
-    #input(">> press any key...")
 
     if torch.cuda.is_available():
         evaluation_model = evaluation_model.to("cuda")
@@ -1330,21 +1312,18 @@ if __name__ == "__main__":
                 "",
             ], 
             [
-                " what do you want",
+                " can i help you",
                 " i want that brown dog to go away",
-                " fine",
                 ""
             ],
             [
-                " what do you want",
+                " can i help you",
                 " i want to have that brown dog go away",
-                " fine",
                 "",
             ],
             [
-                " what do you want",
+                " can i help you",
                 " i want to let that brown dog go away",
-                " fine",
                 "",
             ],
         ]
@@ -1373,19 +1352,22 @@ if __name__ == "__main__":
                 "",
             ], 
             [
-                " what do you want",
+                " can i help you",
                 " i want that brown dog to go away",
-                " fine",
                 ""
             ], 
             [
-                " what do you want",
+                " can i help you",
+                " i want to have that brown dog go away",
+                "",
+            ], 
+            [
+                " can i help you",
                 " i want to let that brown dog go away",
-                " fine",
                 "",
             ],
         ]
-        focus_list = [" again", " away", " away"]
+        focus_list = [" again", " dog", " dog", "dog"]
         # prepare data
         data_list = []
         for i, turns in enumerate(turns_list):
@@ -1398,7 +1380,7 @@ if __name__ == "__main__":
             data_list.append( [input_ids, speaker_ids, focus_id] )
         # compute ig
         word_ig, word_ids = evaluation_model.focus_word_IG(
-            data_list, n_token=8, m=120 #70
+            data_list, m=120 #70
         )
         # represent result
         for i, ig in enumerate(word_ig):
@@ -1407,8 +1389,8 @@ if __name__ == "__main__":
             print(">>", ig)
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             print(">>", tokens)#, word_ids[i])
-            fig, ax = Plots.context_attention(
-                ig, ylim=[-0.5, 2], ylabel="Word_IG", plot=args.plot
+            fig, ax = Plots.integrated_gradient(
+                ig, tokens, focus_list[i], 
             )
             fig.savefig(join(savepath, f"custom_word_ig_{i}.png"))
         torch.save(

@@ -247,7 +247,7 @@ def get_false_tokens(trp, input_ids, prob_thresh, sp1_idx, sp2_idx):
     return false_bs, false_inds
 
 
-def get_focus_n_tokens(input_ids, focus_id, n_token=4):
+def get_focus_n_tokens(input_ids, focus_id):
     """get_focus_n_tokens.
 
     Gets n tokens prior to focus_id token from input_ids. 
@@ -267,13 +267,13 @@ def get_focus_n_tokens(input_ids, focus_id, n_token=4):
     for b, input_b in enumerate(input_ids):
         # b: e.g. 0
         # input_b : e.g. tensor([50257, 7415, 356, 1138, 287, 262, 3952, 50258, 8788, 618, 481, 345, 1826, 757, 50257, 9439])
-        if len(input_b) > n_token:
-            tgt_ind = torch.where(input_b==focus_id[b])
-            #print("tgt_ind", tgt_ind)
-            # tgt_ind: e.g. ( tensor([4]), )
-            # focus: e.g. tensor([356, 1138]) if focus_id=287 and n_token=2
-            focus_inds.append( tgt_ind[0] )
-            focus_bs.append( torch.ones_like(tgt_ind[0]).fill_(b) )
+        #if len(input_b) > n_token:
+        tgt_ind = torch.where(input_b==focus_id[b])
+        #print("tgt_ind", tgt_ind)
+        # tgt_ind: e.g. ( tensor([4]), )
+        # focus: e.g. tensor([356, 1138]) if focus_id=287 and n_token=2
+        focus_inds.append( tgt_ind[0] )
+        focus_bs.append( torch.ones_like(tgt_ind[0]).fill_(b) )
     if len(focus_bs) > 0:
         # e.g. turns [tensor([0, 0]), tensor(1, 1)] into tensor([0, 0, 1, 1])
         focus_bs = torch.cat(focus_bs)
