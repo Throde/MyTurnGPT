@@ -1448,6 +1448,6 @@ if __name__ == "__main__":
             tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
             print(">>", tokens)#, word_ids[i])
             print("-" * 20)
-        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig_2.txt"), )
+        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig_3.txt"), )
 
     #ans = input("end?")
