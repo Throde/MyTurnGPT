@@ -9,9 +9,9 @@
 #$ -cwd
 #$ -o log/eval_false_word_out.log
 #$ -e log/eval_false_word_err.log
-#$ -l h_rt=24:00:00 
-#$ -pe gpu 1
-#$ -l h_vmem=256G
+#$ -l h_rt=48:00:00 
+#$ -pe gpu 4
+#$ -l h_vmem=64G
 
 # priority
 #$ -P lel_hcrc_cstr_students
@@ -35,7 +35,7 @@ python ./turngpt/eval.py \
   --model pretrained \
   --checkpoint turngpt/runs/TurnGPTpretrained/version_3/checkpoints/epoch=4-val_loss=2.37236.ckpt \
   --tokenizer turngpt/runs/TurnGPTpretrained/version_3/tokenizer.pt \
-  --datasets maptask \
+  --datasets maptask switchboard \
   --chunk_size 512 \
   --batch_size 2 \
   --false_word_ig

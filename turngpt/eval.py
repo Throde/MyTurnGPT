@@ -728,6 +728,7 @@ class TurnGPTEval(pl.LightningModule):
         step = 0
         for batch in tqdm(test_dataloader, desc="False Word IG"):
 
+            # skip older data
             if step >= restore_from:
 
                 input_ids, speaker_ids = batch[0], batch[1]
@@ -769,7 +770,7 @@ class TurnGPTEval(pl.LightningModule):
                     continue
 
                 # Extract the attention over the words of the focus point
-                for i, b in enumerate(tqdm(focus_bs, desc="Batch")):
+                for i, b in enumerate(tqdm(focus_bs, desc=f"Batch{step}")):
                     # i, b: e.g. 0(index), 0(batch_num)
                     false_index = focus_inds[i]
                     # false_index: e.g. 8
