@@ -713,7 +713,8 @@ class TurnGPTEval(pl.LightningModule):
     
     # DH: add
     def word_IG(
-        self, test_dataloader, prob_thresh=0.2, m=70, normalize=True, actual_end=False,
+        self, test_dataloader, prob_thresh=0.2, m=70, normalize=True, actual_end=False, 
+        save_step=10, tokenizer=None, savepath="", restore_from=0
     ):
         print("Calculating the IG for all valid turn-shift predictions")
         print("This function is very slow (forward/backward pass for each target focus)")
@@ -724,122 +725,126 @@ class TurnGPTEval(pl.LightningModule):
         error_skipped = 0  # skipped due to IG calculation was over recommended error
         not_in_turn_skipped = 0 # DH: skipped due to false token not found in turns
 
-        ct = 0
+        step = 0
         for batch in tqdm(test_dataloader, desc="False Word IG"):
-            # if ct<5:
-            #     ct += 1
-            #     continue
-            input_ids, speaker_ids = batch[0], batch[1]
-            #print(">> input_ids", input_ids, input_ids.size() )
-            #print(">> speaker_ids", speaker_ids, speaker_ids.size())
 
-            # Get likelihood over trp / turn-shifts over batch 
-            # (DH: tensors are copied to GPU device, and computations are done there)
-            trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
+            if step >= restore_from:
 
-            if not actual_end:
-                # Get the points where the model makes incorrect predictions between trp & 'prob_thresh'
-                focus_bs, focus_inds = get_false_tokens(
-                    trp["trp"], 
-                    input_ids, 
-                    prob_thresh=prob_thresh, 
-                    sp1_idx=self.sp1_idx,
-                    sp2_idx=self.sp2_idx
-                )
-            else:
-                # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
-                focus_bs, focus_inds = get_focus_indices(
-                    trp["trp"],
-                    input_ids,
-                    prob_thresh=prob_thresh,
-                    n_context=0,
-                    sp1_idx=self.sp1_idx,
-                    sp2_idx=self.sp2_idx,
-                )
-            # print(">> focus_bs", focus_bs, len(focus_bs) )
-            # print(">> focus_inds", focus_inds, len(focus_inds) )
+                input_ids, speaker_ids = batch[0], batch[1]
+                #print(">> input_ids", input_ids, input_ids.size() )
+                #print(">> speaker_ids", speaker_ids, speaker_ids.size())
 
-            # get all turns in batch
-            turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+                # Get likelihood over trp / turn-shifts over batch 
+                # (DH: tensors are copied to GPU device, and computations are done there)
+                trp = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
 
-            # Skip batch if no suitable targets was found
-            if len(focus_bs) == 0:
-                batch_skipped += 1
-                continue
-
-            # Extract the attention over the words of the focus point
-            for i, b in enumerate(tqdm(focus_bs, desc="Batch")):
-                # i, b: e.g. 0(index), 0(batch_num)
-                false_index = focus_inds[i]
-                # false_index: e.g. 8
-                t_s, t_e = find_turn_with_index(false_index, turns[b])
-                if t_s==-1:
-                    not_in_turn_skipped += 1
-                    continue
-                #print(">> false_index:", false_index)
-                #print(">> turns[b]:", turns[b])
-                #input(">> press any key...")
-
-                # Only the past is relevant for the gradient computation
-                tmp_input = input_ids[b, t_s : false_index+1]
-                tmp_speaker = speaker_ids[b, t_s : false_index+1]
-                # tmp_input: e.g. tensor([50257,   523,   345,   821,  1016,   510])
-                # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257])
-
-                # the relevant focus token is the opposite of the speaker at focus_index
-                # corresponds to shifting turn (prediction after the last word is another <speaker>)
-                focus_token = (
-                    self.sp1_idx
-                    if tmp_speaker[false_index-t_s] == self.sp2_idx
-                    else self.sp2_idx
-                )
-                #print(">> focus_token", focus_token)
-
-                # Using a try statement here because this whole function is so slow
-                # so we might want to interrupt it but still get some values back
-                try:
-                    # ig.keys:  ['ig', 'focus_prob', 'all_predictions', 'error']
-                    # ig['ig']: (B, N, hidden_dim) e.g. (1, 19, 768)
-                    ig = self.integrated_gradient(
-                        tmp_input.unsqueeze(0),  # unsqueeze batch dim
-                        tmp_speaker.unsqueeze(0),  # unsqueeze batch dim
-                        focus_index=false_index-t_s,
-                        focus_token=focus_token,
-                        m=m,
-                        baseline_idx=self.pad_idx,
-                        #use_pbar=True,  # DH add pbar
+                if not actual_end:
+                    # Get the points where the model makes incorrect predictions between trp & 'prob_thresh'
+                    focus_bs, focus_inds = get_false_tokens(
+                        trp["trp"], 
+                        input_ids, 
+                        prob_thresh=prob_thresh, 
+                        sp1_idx=self.sp1_idx,
+                        sp2_idx=self.sp2_idx
                     )
-                except KeyboardInterrupt:
-                    return torch.stack(false_word_ig)
-                #print(">> ig.ig", ig['ig'])
-                #print(">> ig.focus_prob", ig['focus_prob'])
+                else:
+                    # Get the points where the model assigned a larger trp likelihood > 'prob_thresh'
+                    focus_bs, focus_inds = get_focus_indices(
+                        trp["trp"],
+                        input_ids,
+                        prob_thresh=prob_thresh,
+                        n_context=0,
+                        sp1_idx=self.sp1_idx,
+                        sp2_idx=self.sp2_idx,
+                    )
+                # print(">> focus_bs", focus_bs, len(focus_bs) )
+                # print(">> focus_inds", focus_inds, len(focus_inds) )
 
-                # Skip IG calculation with error larger than 5% which is recommended in the paper
-                if ig["error"] >= 5:
-                    print(">> large IG error: ", ig['error'])
-                    error_skipped += 1
+                # get all turns in batch
+                turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
+
+                # Skip batch if no suitable targets was found
+                if len(focus_bs) == 0:
+                    batch_skipped += 1
                     continue
 
-                # Iterate over all context (and current) turn and extract IG-sum for each turn
-                tmp_context_ig = []
-                for tok in ig["ig"][0]: # ig is always of size [1, N, hidden_dim] (one batch one iteration)
-                    #print(tok)
-                    tmp_context_ig.append(tok.sum())
-                tmp_context_ig = torch.stack(tmp_context_ig).cpu()
-                #print(">> tmp_context_ig", tmp_context_ig)
+                # Extract the attention over the words of the focus point
+                for i, b in enumerate(tqdm(focus_bs, desc="Batch")):
+                    # i, b: e.g. 0(index), 0(batch_num)
+                    false_index = focus_inds[i]
+                    # false_index: e.g. 8
+                    t_s, t_e = find_turn_with_index(false_index, turns[b])
+                    if t_s==-1:
+                        not_in_turn_skipped += 1
+                        continue
+                    #print(">> false_index:", false_index)
+                    #print(">> turns[b]:", turns[b])
+                    #input(">> press any key...")
 
-                # Normalizes the IG values by the output probability of focus_index
-                # The gradient contribution should add up to 'focus_prob'
-                if normalize:
-                    tmp_context_ig /= ig["focus_prob"]
-                # keep only n_token tokens prior to and including the focus token
-                false_word_ig.append( tmp_context_ig )
-                turns_word.append( tmp_input )
-                #print(">> false_word_ig", false_word_ig)
+                    # Only the past is relevant for the gradient computation
+                    tmp_input = input_ids[b, t_s : false_index+1]
+                    tmp_speaker = speaker_ids[b, t_s : false_index+1]
+                    # tmp_input: e.g. tensor([50257,   523,   345,   821,  1016,   510])
+                    # tmp_speaker: e.g. tensor([50257, 50257, 50257, 50257, 50257, 50257])
 
-            ct += 1
-            if ct==5:
-                break
+                    # the relevant focus token is the opposite of the speaker at focus_index
+                    # corresponds to shifting turn (prediction after the last word is another <speaker>)
+                    focus_token = (
+                        self.sp1_idx
+                        if tmp_speaker[false_index-t_s] == self.sp2_idx
+                        else self.sp2_idx
+                    )
+                    #print(">> focus_token", focus_token)
+
+                    # Using a try statement here because this whole function is so slow
+                    # so we might want to interrupt it but still get some values back
+                    try:
+                        # ig.keys:  ['ig', 'focus_prob', 'all_predictions', 'error']
+                        # ig['ig']: (B, N, hidden_dim) e.g. (1, 19, 768)
+                        ig = self.integrated_gradient(
+                            tmp_input.unsqueeze(0),  # unsqueeze batch dim
+                            tmp_speaker.unsqueeze(0),  # unsqueeze batch dim
+                            focus_index=false_index-t_s,
+                            focus_token=focus_token,
+                            m=m,
+                            baseline_idx=self.pad_idx,
+                            #use_pbar=True,  # DH add pbar
+                        )
+                    except KeyboardInterrupt:
+                        return torch.stack(false_word_ig)
+                    #print(">> ig.ig", ig['ig'])
+                    #print(">> ig.focus_prob", ig['focus_prob'])
+
+                    # Skip IG calculation with error larger than 5% which is recommended in the paper
+                    if ig["error"] >= 5:
+                        print(">> large IG error: ", ig['error'])
+                        error_skipped += 1
+                        continue
+
+                    # Iterate over all context (and current) turn and extract IG-sum for each turn
+                    tmp_context_ig = []
+                    for tok in ig["ig"][0]: # ig is always of size [1, N, hidden_dim] (one batch one iteration)
+                        #print(tok)
+                        tmp_context_ig.append(tok.sum())
+                    tmp_context_ig = torch.stack(tmp_context_ig).cpu()
+                    #print(">> tmp_context_ig", tmp_context_ig)
+
+                    # Normalizes the IG values by the output probability of focus_index
+                    # The gradient contribution should add up to 'focus_prob'
+                    if normalize:
+                        tmp_context_ig /= ig["focus_prob"]
+                    # keep only n_token tokens prior to and including the focus token
+                    false_word_ig.append( tmp_context_ig )
+                    turns_word.append( tmp_input )
+                    #print(">> false_word_ig", false_word_ig)
+
+            step += 1
+            # save partial results if it is new checkpoints
+            if (not step % save_step) and (step >= restore_from):
+                save_txt(false_word_ig, turns_word, tokenizer, join(savepath, f"word_ig_{actual_end}{step//save_step}.txt"), )
+                # empty two lists
+                false_word_ig = []
+                turns_word = []
 
         #false_word_ig = torch.stack(false_word_ig)
         print("Context attention samples: ", len(false_word_ig))
@@ -1404,34 +1409,34 @@ if __name__ == "__main__":
     if args.false_word_ig:
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
-            test_dataloader, prob_thresh, m=120, actual_end=False
+            test_dataloader, prob_thresh, m=120, actual_end=False, 
+            save_step=10, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
         )
-
         # represent result
-        for i, ig in enumerate(word_ig):
-            # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
-            # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-            print(">>", ig)
-            tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-            print(">>", tokens)#, word_ids[i])
-            print("-" * 20)
-        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"false_word_ig_2.txt"), )
+        # for i, ig in enumerate(word_ig):
+        #     # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
+        #     # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
+        #     print(">>", ig)
+        #     tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
+        #     print(">>", tokens)#, word_ids[i])
+        #     print("-" * 20)
+        #save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"false_word_ig_2.txt"), )
 
     # added by DH
     if args.true_word_ig:
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
-            test_dataloader, prob_thresh, m=120, actual_end=True
+            test_dataloader, prob_thresh, m=120, actual_end=True, 
+            save_step=10, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
         )
-
         # represent result
-        for i, ig in enumerate(word_ig):
-            # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
-            # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-            print(">>", ig)
-            tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-            print(">>", tokens)#, word_ids[i])
-            print("-" * 20)
-        save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig_3.txt"), )
+        # for i, ig in enumerate(word_ig):
+        #     # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
+        #     # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
+        #     print(">>", ig)
+        #     tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
+        #     print(">>", tokens)#, word_ids[i])
+        #     print("-" * 20)
+        #save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig_3.txt"), )
 
     #ans = input("end?")
