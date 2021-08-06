@@ -5,12 +5,12 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N turngpt
+#$ -N turngpt-nontitanx
 #$ -cwd
 #$ -o log/train_out.log
 #$ -e log/train_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 4
+#$ -pe gpu 4
 #$ -l h_vmem=64G
 
 # priority
