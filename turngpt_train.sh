@@ -10,8 +10,8 @@
 #$ -o log/train_out.log
 #$ -e log/train_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu 1
-#$ -l h_vmem=512G
+#$ -pe gpu-titanx 4
+#$ -l h_vmem=32G
 
 # priority
 #$ -P lel_hcrc_cstr_students
@@ -33,7 +33,7 @@ source activate slptorch
 # python hello.py
 python ./turngpt/main.py \
   --model pretrained \
-  --datasets taskmaster maptask switchboard \
+  --datasets taskmaster persona dailydialog maptask switchboard \
   --chunk_size 512 \
   --gpus 1 \
   --batch_size 2 \
