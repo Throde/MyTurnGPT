@@ -37,5 +37,5 @@ python ./turngpt/eval.py \
   --tokenizer turngpt/runs/TurnGPTpretrained/version_3/tokenizer.pt \
   --datasets maptask switchboard \
   --chunk_size 512 \
-  --batch_size 2 \
+  --batch_size 1 \
   --false_word_ig
