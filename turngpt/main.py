@@ -47,7 +47,7 @@ def main(args):
         checkpoint_callback = ModelCheckpoint(
             dirpath=ch_path,
             filename="{epoch}-{val_loss:.5f}",
-            save_top_k=10,#2,
+            save_top_k=6,#2,
             mode="min",
             monitor="val_loss",
         )

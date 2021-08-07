@@ -10,8 +10,8 @@
 #$ -o log/train_out.log
 #$ -e log/train_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 4
-#$ -l h_vmem=64G
+#$ -pe gpu 4
+#$ -l h_vmem=128G
 
 # priority
 #$ -P lel_hcrc_cstr_students
@@ -35,6 +35,6 @@ python ./turngpt/main.py \
   --model pretrained \
   --datasets taskmaster persona dailydialog maptask switchboard \
   --chunk_size 512 \
-  --gpus 1 \
-  --batch_size 2 \
+  --gpus 4 \
+  --batch_size 1 \
   --early_stopping
