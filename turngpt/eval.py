@@ -35,14 +35,6 @@ from turngpt.turngpt_utils import (
 import matplotlib.pyplot as plt
 
 
-def str2bool(s):
-    if s.lower() in ('yes', 'true', 't', 'y', '1'):
-        return True
-    elif s.lower() in ('no', 'false', 'f', 'n', '0'):
-        return False
-    else:
-        raise ArgumentTypeError('Unsupported value encountered.')
-
 def load():
     parser = ArgumentParser()
     parser.add_argument("--chunk_size", default=512, type=int)
