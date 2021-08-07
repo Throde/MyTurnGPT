@@ -1,4 +1,4 @@
-from argparse import ArgumentParser
+from argparse import ArgumentParser, ArgumentTypeError
 import math
 import torch
 from torch.serialization import save
@@ -34,6 +34,14 @@ from turngpt.turngpt_utils import (
 
 import matplotlib.pyplot as plt
 
+
+def str2bool(s):
+    if s.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif s.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise ArgumentTypeError('Unsupported value encountered.')
 
 def load():
     parser = ArgumentParser()
@@ -726,7 +734,7 @@ class TurnGPTEval(pl.LightningModule):
         not_in_turn_skipped = 0 # DH: skipped due to false token not found in turns
 
         step = 0
-        for batch in tqdm(test_dataloader, desc="False Word IG"):
+        for batch in tqdm(test_dataloader, desc=f"{actual_end} Word IG"):
 
             # skip older data
             if step >= restore_from:
@@ -955,12 +963,12 @@ class TurnGPTEval(pl.LightningModule):
         )
         parser.add_argument(
             "--perplexity",
-            type=bool,
+            action="store_false",   # NOTE: use --perplexity will cancel it!
             default=True,
         )
         parser.add_argument(
             "--classification",
-            type=bool,
+            type="store_false",     # NOTE: use --classification will cancel it!
             default=True,
         )
         parser.add_argument(
@@ -1203,26 +1211,25 @@ if __name__ == "__main__":
     print(">> Model, data ok; savepath:", savepath)
     #input(">> [1/1] Press any key to continue")
 
-    if False:   # DH: to exclude computing perplexity and classification
-        if args.perplexity:
-            # ce_loss, ppl = perplexity(model, dm, args)
-            ce_loss, ppl = evaluation_model.cross_entropy(test_dataloader)
-            print("split: ", args.split)
-            print("avg CE loss: ", ce_loss)
-            print("ppl (nats): ", ppl)
-            write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))
+    if args.perplexity:
+        # ce_loss, ppl = perplexity(model, dm, args)
+        ce_loss, ppl = evaluation_model.cross_entropy(test_dataloader)
+        print("split: ", args.split)
+        print("avg CE loss: ", ce_loss)
+        print("ppl (nats): ", ppl)
+        write_txt([f"ce_loss: {ce_loss}", f"ppl: {ppl}"], join(savepath, "loss.txt"))
 
-        if args.classification:
-            score = evaluation_model.classification(test_dataloader)
-            fig, ax = Plots.bacc(score, plot=args.plot)
-            fig.savefig(join(savepath, f"bacc_{args.datasets}_{args.split}.png"))
-            torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))
-            pgm = score["positive_guesses"].mean()
-            pgs = score["positive_guesses"].std()
-            ngm = score["negative_guesses"].mean()
-            ngs = score["negative_guesses"].std()
-            print("Pos: ", pgm, pgs)
-            print("Pos: ", ngm, ngs)
+    if args.classification:
+        score = evaluation_model.classification(test_dataloader)
+        fig, ax = Plots.bacc(score, plot=args.plot)
+        fig.savefig(join(savepath, f"bacc_{args.datasets}_{args.split}.png"))
+        torch.save(score, join(savepath, f"bacc_{args.datasets}_{args.split}.pt"))
+        pgm = score["positive_guesses"].mean()
+        pgs = score["positive_guesses"].std()
+        ngm = score["negative_guesses"].mean()
+        ngs = score["negative_guesses"].std()
+        print("Pos: ", pgm, pgs)
+        print("Pos: ", ngm, ngs)
 
     n_context = 4
 
