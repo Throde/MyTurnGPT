@@ -968,7 +968,7 @@ class TurnGPTEval(pl.LightningModule):
         )
         parser.add_argument(
             "--classification",
-            type="store_false",     # NOTE: use --classification will cancel it!
+            action="store_false",   # NOTE: use --classification will cancel it!
             default=True,
         )
         parser.add_argument(
