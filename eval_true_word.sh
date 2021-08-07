@@ -10,7 +10,7 @@
 #$ -o log/eval_true_word_out.log
 #$ -e log/eval_true_word_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu 4
+#$ -pe gpu-titanx 4
 #$ -l h_vmem=32G
 
 # priority
