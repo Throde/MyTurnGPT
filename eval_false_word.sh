@@ -38,6 +38,7 @@ python ./turngpt/eval.py \
   --datasets maptask switchboard \
   --chunk_size 256 \
   --batch_size 1 \
+  --num_workers 8 \
   --perplexity \
   --classification \
   --false_word_ig
