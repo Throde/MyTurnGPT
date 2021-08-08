@@ -10,8 +10,8 @@
 #$ -o log/eval_false_word_out.log
 #$ -e log/eval_false_word_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 2
-#$ -l h_vmem=64G
+#$ -pe gpu-titanx 4
+#$ -l h_vmem=62G
 
 # priority
 #$ -P lel_hcrc_cstr_students
@@ -38,7 +38,7 @@ python ./turngpt/eval.py \
   --datasets maptask switchboard \
   --chunk_size 128 \
   --batch_size 1 \
-  --num_workers 2 \
+  --num_workers 4 \
   --perplexity \
   --classification \
   --false_word_ig
