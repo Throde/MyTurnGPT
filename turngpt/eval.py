@@ -778,9 +778,6 @@ class TurnGPTEval(pl.LightningModule):
                     if t_s==-1:
                         not_in_turn_skipped += 1
                         continue
-                    #print(">> false_index:", false_index)
-                    #print(">> turns[b]:", turns[b])
-                    #input(">> press any key...")
 
                     # Only the past is relevant for the gradient computation
                     tmp_input = input_ids[b, t_s : false_index+1]

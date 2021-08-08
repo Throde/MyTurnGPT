@@ -10,7 +10,7 @@
 #$ -o log/eval_true_word_out.log
 #$ -e log/eval_true_word_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 8
+#$ -pe gpu-titanx 6
 #$ -l h_vmem=32G
 
 # priority
@@ -38,7 +38,7 @@ python ./turngpt/eval.py \
   --datasets maptask switchboard \
   --chunk_size 256 \
   --batch_size 1 \
-  --num_workers 8 \
+  --num_workers 6 \
   --perplexity \
   --classification \
   --true_word_ig
