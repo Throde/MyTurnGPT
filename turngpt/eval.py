@@ -1,4 +1,5 @@
 from argparse import ArgumentParser, ArgumentTypeError
+from logging import error
 import math
 import torch
 from torch.serialization import save
@@ -839,16 +840,22 @@ class TurnGPTEval(pl.LightningModule):
             step += 1
             # save partial results if it is new checkpoints
             if (not step % save_step) and (step >= restore_from):
-                save_txt(false_word_ig, turns_word, tokenizer, join(savepath, f"word_ig_{actual_end}{step//save_step}.txt"), )
+                save_txt(false_word_ig, turns_word, tokenizer, 
+                        join(savepath, f"word_ig_{actual_end}{step//save_step}.txt"), 
+                        skipped_dic={
+                            "skipped_batches": batch_skipped, 
+                            "skipped_error": error_skipped, 
+                            "skipped_not_in_turn": not_in_turn_skipped, 
+                        }
+                )
                 # empty two lists
                 false_word_ig = []
                 turns_word = []
+                # reset skipped counters
+                batch_skipped = 0
+                error_skipped = 0
+                not_in_turn_skipped = 0
 
-        #false_word_ig = torch.stack(false_word_ig)
-        print("Context attention samples: ", len(false_word_ig))
-        print("Skipped batches: ", batch_skipped)
-        print("Skipped error: ", error_skipped)
-        print("Skipped not_in_turn: ", not_in_turn_skipped) # DH
         return false_word_ig, turns_word
 
     def get_trp(self, input_ids, speaker_ids):
@@ -1407,7 +1414,7 @@ if __name__ == "__main__":
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=False, 
-            save_step=10, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
+            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
         )
         # represent result
         # for i, ig in enumerate(word_ig):
@@ -1424,7 +1431,7 @@ if __name__ == "__main__":
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=True, 
-            save_step=10, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
+            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
         )
         # represent result
         # for i, ig in enumerate(word_ig):
