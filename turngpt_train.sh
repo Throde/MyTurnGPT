@@ -34,7 +34,7 @@ source activate slptorch
 python ./turngpt/main.py \
   --model pretrained \
   --datasets taskmaster persona dailydialog maptask switchboard \
-  --chunk_size 512 \
+  --chunk_size 128 \
   --gpus 4 \
   --batch_size 1 \
   --early_stopping
