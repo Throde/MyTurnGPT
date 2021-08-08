@@ -10,8 +10,8 @@
 #$ -o log/eval_true_word_out.log
 #$ -e log/eval_true_word_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 4
-#$ -l h_vmem=62G
+#$ -pe gpu-titanx 2
+#$ -l h_vmem=64G
 
 # priority
 #$ -P lel_hcrc_cstr_students
@@ -36,9 +36,9 @@ python ./turngpt/eval.py \
   --checkpoint turngpt/runs/TurnGPTpretrained/version_3/checkpoints/epoch=4-val_loss=2.37236.ckpt \
   --tokenizer turngpt/runs/TurnGPTpretrained/version_3/tokenizer.pt \
   --datasets maptask switchboard \
-  --chunk_size 256 \
+  --chunk_size 128 \
   --batch_size 1 \
-  --num_workers 4 \
+  --num_workers 2 \
   --perplexity \
   --classification \
   --true_word_ig
