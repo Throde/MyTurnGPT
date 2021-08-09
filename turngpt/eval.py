@@ -1414,7 +1414,7 @@ if __name__ == "__main__":
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=False, 
-            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
+            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=1250
         )
         # represent result
         # for i, ig in enumerate(word_ig):
@@ -1431,7 +1431,7 @@ if __name__ == "__main__":
         # prepare data
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=True, 
-            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=0
+            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=1250
         )
         # represent result
         # for i, ig in enumerate(word_ig):

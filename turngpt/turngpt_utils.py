@@ -37,7 +37,10 @@ def get_turns(input_ids, sp1_idx, sp2_idx):
     turns = []
     for b in range(input_ids.shape[0]):
         # help tensor.unfold(): https://haxibiao.com/article/76966/
-        turns.append(sp_inds[sp_b == b].unfold(0, 2, 1))    # dim, size, step
+        try:
+            turns.append(sp_inds[sp_b == b].unfold(0, 2, 1))    # dim, size, step
+        except:
+            continue
     return turns
 
 
