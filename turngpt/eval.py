@@ -775,7 +775,12 @@ class TurnGPTEval(pl.LightningModule):
                     # i, b: e.g. 0(index), 0(batch_num)
                     false_index = focus_inds[i]
                     # false_index: e.g. 8
-                    t_s, t_e = find_turn_with_index(false_index, turns[b])
+                    try:
+                        t_s, t_e = find_turn_with_index(false_index, turns[b])
+                    except:
+                        not_in_turn_skipped += 1
+                        continue
+
                     if t_s==-1:
                         not_in_turn_skipped += 1
                         continue
