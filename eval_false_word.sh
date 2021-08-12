@@ -10,7 +10,7 @@
 #$ -o log/eval_false_word_out.log
 #$ -e log/eval_false_word_err.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 2
+#$ -pe gpu 2
 #$ -l h_vmem=64G
 
 # priority
