@@ -1022,17 +1022,21 @@ class Plots:
         xy_label_size=10,
         style="seaborn-darkgrid",
         plot=False,
+        highlightx=None,
     ):
         plt.style.use(style)
-        fig, ax = plt.subplots(1, 1, figsize=(6, 3))
+        fig, ax = plt.subplots(1, 1, figsize=(5, 3))
         x = torch.arange(len(trp))
         ax.bar(x, trp)
         ax.set_ylim([0, 1])
         ax.set_xticks(range(len(tokens)))
         ax.set_xticklabels(
-            tokens, fontdict={"fontsize": text_size}, rotation=65   # , "fontweight": "bold"
+            tokens, fontdict={"fontsize": text_size}, rotation=45   # , "fontweight": "bold"
         )
         ax.set_ylabel("TRP Prediction", fontdict={"fontsize": xy_label_size})
+        if highlightx:
+            ax.get_xticklabels()[tokens.index(highlightx)].set_color("blue")
+        
         plt.tight_layout()
         if plot:
             plt.pause(0.01)
@@ -1142,7 +1146,7 @@ class Plots:
     @staticmethod
     def integrated_gradient(ig, tokens, focus, reduction=None, plot=False):
         plt.style.use("seaborn-darkgrid")
-        fig, ax = plt.subplots(1, 1)
+        fig, ax = plt.subplots(1, 1, figsize=(5,4))
         if reduction == "sum":
             i_g = ig.sum(dim=-1)
             ax.bar(torch.arange(len(tokens)), i_g[0])
@@ -1152,10 +1156,11 @@ class Plots:
         else:
             i_g = ig  # DH: default is None
             ax.bar(torch.arange(len(tokens)), i_g)
+        
         y0, y1 = ax.get_ylim()
         #ax.axvline(x=focus, ymin=y0, ymax=y1, c="r", alpha=0.5)
         ax.set_xticks(range(len(tokens)))
-        ax.set_xticklabels(tokens, rotation=55)
+        ax.set_xticklabels(tokens, rotation=45)
         ax.set_ylabel("IG")
         plt.tight_layout()
         if plot:
