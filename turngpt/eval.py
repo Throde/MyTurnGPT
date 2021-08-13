@@ -1329,14 +1329,17 @@ if __name__ == "__main__":
             [
                 " can i help you",
                 " i want that brown dog to go away",
+                "",
             ],
             [
                 " can i help you",
                 " i want to have that brown dog go away",
+                "",
             ],
             [
                 " can i help you",
                 " i want to let that brown dog go away",
+                "",
             ],
         ]
         for i, turns in enumerate(turns_list):
@@ -1366,14 +1369,17 @@ if __name__ == "__main__":
             [
                 " can i help you",
                 " i want that brown dog to go away",
+                "",
             ], 
             [
                 " can i help you",
                 " i want to have that brown dog go away",
+                "",
             ], 
             [
                 " can i help you",
                 " i want to let that brown dog go away",
+                "",
             ],
         ]
         focus_list = [" again", " dog", " dog", " dog"]
