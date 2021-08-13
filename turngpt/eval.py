@@ -1030,9 +1030,9 @@ class Plots:
         ax.set_ylim([0, 1])
         ax.set_xticks(range(len(tokens)))
         ax.set_xticklabels(
-            tokens, fontdict={"fontsize": text_size, "fontweight": "bold"}, rotation=65
+            tokens, fontdict={"fontsize": text_size}, rotation=65   # , "fontweight": "bold"
         )
-        ax.set_ylabel("TRP", fontdict={"fontsize": xy_label_size, "fontweight": "bold"})
+        ax.set_ylabel("TRP Prediction", fontdict={"fontsize": xy_label_size})
         plt.tight_layout()
         if plot:
             plt.pause(0.01)
@@ -1141,6 +1141,7 @@ class Plots:
 
     @staticmethod
     def integrated_gradient(ig, tokens, focus, reduction=None, plot=False):
+        plt.style.use("seaborn-darkgrid")
         fig, ax = plt.subplots(1, 1)
         if reduction == "sum":
             i_g = ig.sum(dim=-1)
@@ -1365,17 +1366,14 @@ if __name__ == "__main__":
             [
                 " can i help you",
                 " i want that brown dog to go away",
-                ""
             ], 
             [
                 " can i help you",
                 " i want to have that brown dog go away",
-                "",
             ], 
             [
                 " can i help you",
                 " i want to let that brown dog go away",
-                "",
             ],
         ]
         focus_list = [" again", " dog", " dog", " dog"]
