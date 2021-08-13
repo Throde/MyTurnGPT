@@ -759,8 +759,6 @@ class TurnGPTEval(pl.LightningModule):
                         sp1_idx=self.sp1_idx,
                         sp2_idx=self.sp2_idx,
                     )
-                # print(">> focus_bs", focus_bs, len(focus_bs) )
-                # print(">> focus_inds", focus_inds, len(focus_inds) )
 
                 # get all turns in batch
                 turns = get_turns(input_ids, self.sp1_idx, self.sp2_idx)
@@ -1026,7 +1024,7 @@ class Plots:
         plot=False,
     ):
         plt.style.use(style)
-        fig, ax = plt.subplots(1, 1, figsize=(12, 4))
+        fig, ax = plt.subplots(1, 1, figsize=(6, 3))
         x = torch.arange(len(trp))
         ax.bar(x, trp)
         ax.set_ylim([0, 1])
@@ -1330,17 +1328,14 @@ if __name__ == "__main__":
             [
                 " can i help you",
                 " i want that brown dog to go away",
-                ""
             ],
             [
                 " can i help you",
                 " i want to have that brown dog go away",
-                "",
             ],
             [
                 " can i help you",
                 " i want to let that brown dog go away",
-                "",
             ],
         ]
         for i, turns in enumerate(turns_list):
@@ -1416,36 +1411,18 @@ if __name__ == "__main__":
 
     # added by DH
     if args.false_word_ig:
-        # prepare data
+        # calculate and save
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=False, 
             save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=9300
         )
-        # represent result
-        # for i, ig in enumerate(word_ig):
-        #     # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
-        #     # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-        #     print(">>", ig)
-        #     tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-        #     print(">>", tokens)#, word_ids[i])
-        #     print("-" * 20)
-        #save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"false_word_ig_2.txt"), )
 
     # added by DH
     if args.true_word_ig:
-        # prepare data
+        # calculate and save
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=True, 
             save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=13700
         )
-        # represent result
-        # for i, ig in enumerate(word_ig):
-        #     # res: e.g. tensor([  0.0000, -19.0994, -16.5760, -19.1928,  15.5170])
-        #     # word_ids[i]: e.g. tensor([50257,  7415,   356,  1138,   287])
-        #     print(">>", ig)
-        #     tokens = [dm.tokenizer.decode(tok_id.item()) for tok_id in word_ids[i]]
-        #     print(">>", tokens)#, word_ids[i])
-        #     print("-" * 20)
-        #save_txt(word_ig, word_ids, dm.tokenizer, join(savepath, f"true_word_ig_3.txt"), )
 
     #ans = input("end?")
