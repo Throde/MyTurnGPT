@@ -1347,7 +1347,7 @@ if __name__ == "__main__":
                 "",
             ],
         ]
-        highlightx_list = [" tomorrow", " dog", " dog", " dog"]
+        highlightx_list = ["tomorrow", "dog", "dog", "dog"]
         for i, turns in enumerate(turns_list):
             input_ids, speaker_ids = turns_to_turngpt_tensors(
                 turns, dm.tokenizer, explicit_turn_shift=True
@@ -1357,7 +1357,6 @@ if __name__ == "__main__":
             print(">> input_ids:", input_ids.squeeze(0))
             full_string = input_ids_to_token(input_ids, dm.tokenizer)
             input_tokens = [token for token in full_string.split() if token!=""]
-            print(input_tokens)
             # NOTE: trp: tensor([[], [], ...]) here we want the first in the batch only
             fig, ax = Plots.trp_sample(
                 trp.cpu().detach().numpy()[0], input_tokens, highlightx=highlightx_list[i]
