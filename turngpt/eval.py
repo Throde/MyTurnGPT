@@ -1347,7 +1347,7 @@ if __name__ == "__main__":
                 turns, dm.tokenizer, explicit_turn_shift=True
             )
             trp = evaluation_model.get_trp(input_ids, speaker_ids)
-            print(">> trp:", trp)
+            #print(">> trp:", trp)
             print(">> input_ids:", input_ids.squeeze(0))
             full_string = input_ids_to_token(input_ids, dm.tokenizer)
             input_tokens = [token for token in full_string.split() if token!=""]
