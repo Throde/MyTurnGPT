@@ -715,7 +715,7 @@ class TurnGPTEval(pl.LightningModule):
     # DH: add
     def word_IG(
         self, test_dataloader, prob_thresh=0.2, m=70, normalize=True, actual_end=False, 
-        save_step=10, tokenizer=None, savepath="", restore_from=0
+        save_step=10, tokenizer=None, savepath="", restore_from=0, end_step=None, 
     ):
         print("Calculating the IG for all valid turn-shift predictions")
         print("This function is very slow (forward/backward pass for each target focus)")
@@ -858,6 +858,9 @@ class TurnGPTEval(pl.LightningModule):
                 batch_skipped = 0
                 error_skipped = 0
                 not_in_turn_skipped = 0
+            # quit if reaching the end_step
+            if end_step and step >= end_step:
+                break
 
         return false_word_ig, turns_word
 
@@ -1031,7 +1034,7 @@ class Plots:
         ax.set_ylim([0, 1])
         ax.set_xticks(range(len(tokens)))
         ax.set_xticklabels(
-            tokens, fontdict={"fontsize": text_size}, rotation=45   # , "fontweight": "bold"
+            tokens, fontdict={"fontsize": text_size}, rotation=90   # , "fontweight": "bold"
         )
         ax.set_ylabel("TRP Prediction", fontdict={"fontsize": xy_label_size})
         if highlightx:
@@ -1160,7 +1163,7 @@ class Plots:
         y0, y1 = ax.get_ylim()
         #ax.axvline(x=focus, ymin=y0, ymax=y1, c="r", alpha=0.5)
         ax.set_xticks(range(len(tokens)))
-        ax.set_xticklabels(tokens, rotation=45)
+        ax.set_xticklabels(tokens, rotation=90)
         ax.set_ylabel("IG")
         plt.tight_layout()
         if plot:
@@ -1424,7 +1427,8 @@ if __name__ == "__main__":
         # calculate and save
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=False, 
-            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=9300
+            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, 
+            restore_from=20000, end_step=None
         )
 
     # added by DH
@@ -1432,7 +1436,8 @@ if __name__ == "__main__":
         # calculate and save
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=True, 
-            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, restore_from=13700
+            save_step=50, tokenizer=dm.tokenizer, savepath=savepath, 
+            restore_from=13700, end_step=None
         )
 
     #ans = input("end?")
