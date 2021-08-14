@@ -5,10 +5,10 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N eval_false_word2
+#$ -N eval_false_word
 #$ -cwd
-#$ -o log/eval_false_word_out2.log
-#$ -e log/eval_false_word_err2.log
+#$ -o log/eval_false_word_out.log
+#$ -e log/eval_false_word_err.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu-titanx 2
 #$ -l h_vmem=64G

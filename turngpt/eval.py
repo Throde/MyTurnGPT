@@ -1428,9 +1428,9 @@ if __name__ == "__main__":
         word_ig, word_ids = evaluation_model.word_IG(
             test_dataloader, prob_thresh, m=120, actual_end=False, 
             save_step=50, tokenizer=dm.tokenizer, savepath=savepath, 
-            restore_from=20000, end_step=None
+            restore_from=13600, end_step=20000
         )
-        # job1: 13669 going up, job2: 20000 going to final
+        # job1: 13600 going up, job2: 20000 going to final
 
     # added by DH
     if args.true_word_ig:
