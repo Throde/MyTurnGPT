@@ -1028,7 +1028,7 @@ class Plots:
         highlightx=None,
     ):
         plt.style.use(style)
-        fig, ax = plt.subplots(1, 1, figsize=(5, 3))
+        fig, ax = plt.subplots(1, 1, figsize=(4, 3))
         x = torch.arange(len(trp))
         ax.bar(x, trp)
         ax.set_ylim([0, 1])
@@ -1048,7 +1048,7 @@ class Plots:
     @staticmethod
     def bacc(classification_score, style="seaborn-darkgrid", plot=False):
         plt.style.use(style)
-        fig, ax = plt.subplots(1, 1)
+        fig, ax = plt.subplots(1, 1, figsize=(4, 3))
         ax.plot(classification_score["all_thresh"], classification_score["all_baccs"])
         ax.set_ylim([0.5, 1])
         ax.set_xlabel("probability thresh")
@@ -1149,7 +1149,7 @@ class Plots:
     @staticmethod
     def integrated_gradient(ig, tokens, focus, reduction=None, plot=False):
         plt.style.use("seaborn-darkgrid")
-        fig, ax = plt.subplots(1, 1, figsize=(5,4))
+        fig, ax = plt.subplots(1, 1, figsize=(4,3))
         if reduction == "sum":
             i_g = ig.sum(dim=-1)
             ax.bar(torch.arange(len(tokens)), i_g[0])
