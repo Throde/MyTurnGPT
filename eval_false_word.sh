@@ -11,7 +11,7 @@
 #$ -e log/eval_false_word_err3.log
 #$ -l h_rt=48:00:00 
 #$ -pe gpu 2
-#$ -l h_vmem=60G
+#$ -l h_vmem=120G
 
 # priority
 #$ -P lel_hcrc_cstr_students
