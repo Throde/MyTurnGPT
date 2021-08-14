@@ -1430,6 +1430,7 @@ if __name__ == "__main__":
             save_step=50, tokenizer=dm.tokenizer, savepath=savepath, 
             restore_from=20000, end_step=None
         )
+        # job1: 13669 going up, job2: 20000 going to final
 
     # added by DH
     if args.true_word_ig:
