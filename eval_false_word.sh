@@ -5,13 +5,13 @@
 #  use the current working directory: -cwd
 #  runtime limit of 5 minutes: -l h_rt
 #  memory limit of 1 Gbyte: -l h_vmem
-#$ -N eval_false_word
+#$ -N eval_false_word3
 #$ -cwd
-#$ -o log/eval_false_word_out.log
-#$ -e log/eval_false_word_err.log
+#$ -o log/eval_false_word_out3.log
+#$ -e log/eval_false_word_err3.log
 #$ -l h_rt=48:00:00 
-#$ -pe gpu-titanx 2
-#$ -l h_vmem=64G
+#$ -pe gpu 2
+#$ -l h_vmem=60G
 
 # priority
 #$ -P lel_hcrc_cstr_students
