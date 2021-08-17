@@ -868,22 +868,29 @@ class TurnGPTEval(pl.LightningModule):
         out = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
         return out["trp"]
 
-    def data_statistic(self, dataloader):
+    def data_statistic(self, dataloader, tokenizer):
         id_dict = {}
         for batch in tqdm(dataloader, desc="Statistic"):
             input_ids, speaker_ids = batch[0], batch[1]
             # input_ids: [[...], [...]] shape[0]=batch_size, shape[1]=chunck_size
             for bat_input in input_ids:
                 for iid in bat_input:
-                    if iid in (self.sp1_idx, self.sp2_idx, 50256):
+                    if iid.item() in (self.sp1_idx, self.sp2_idx, 50256):
                         continue
                     else:
                         try:
-                            id_dict[iid] += 1
+                            id_dict[iid.item()] += 1
                         except:
-                            id_dict[iid] = 1
-                    
-        return id_dict
+                            id_dict[iid.item()] = 1
+        
+        # decode to tokens
+        token_dict = {}
+        s = sum(id_dict.values())
+        for key, value in id_dict.items():
+            token = tokenizer.decode(key)
+            token_dict[token] = value/s
+
+        return sorted(token_dict.items(), key=lambda x:x[1], reverse=True)
 
     @torch.no_grad()
     def prediction_histogram(
@@ -1027,6 +1034,11 @@ class TurnGPTEval(pl.LightningModule):
         )
         parser.add_argument(    # added by DH
             "--trp_sample",
+            action="store_true",
+            default=False,
+        )
+        parser.add_argument(    # added by DH
+            "--data_stat",
             action="store_true",
             default=False,
         )
@@ -1475,4 +1487,10 @@ if __name__ == "__main__":
             restore_from=13700, end_step=None
         )
 
+    # added by DH
+    if args.data_stat:
+        token_list = evaluation_model.data_statistic(test_dataloader, dm.tokenizer)
+        for item in token_list[:10]:
+            print(item)
+    
     #ans = input("end?")
