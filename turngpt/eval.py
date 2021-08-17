@@ -1301,6 +1301,8 @@ if __name__ == "__main__":
             horizon=horizon,
             start_after_first_turn=False,
         )
+        print(prediction["start_words"])
+        print(prediction["samples"])
         fig, ax = Plots.prediction_histograms(
             prediction["prediction_distribution"],
             prediction["start_words"],
