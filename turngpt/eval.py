@@ -844,7 +844,7 @@ class TurnGPTEval(pl.LightningModule):
             # save partial results if it is new checkpoints
             if (not step % save_step) and (step >= restore_from):
                 save_txt(false_word_ig, turns_word, tokenizer, 
-                        join(savepath, f"word_ig_{actual_end}{step//save_step}.txt"), 
+                        join(savepath, f"exp_ig/word_ig_{actual_end}{step//save_step}.txt"), 
                         skipped_dic={
                             "skipped_batches": batch_skipped, 
                             "skipped_error": error_skipped, 
@@ -891,6 +891,26 @@ class TurnGPTEval(pl.LightningModule):
             token_dict[token] = value/s
 
         return sorted(token_dict.items(), key=lambda x:x[1], reverse=True)
+
+    def sample_data(self, dataloader, tokenizer):
+        from random import sample
+
+        sample_list = []
+        limit = 200
+        for batch in tqdm(dataloader, desc="Sampling"):
+            input_ids, speaker_ids = batch[0], batch[1]
+            # input_ids: [[...], [...]] shape[0]=batch_size, shape[1]=chunck_size
+            for bat_input in input_ids:
+                tmp_list = []
+                for iid in bat_input:
+                    if iid.item() in (self.sp1_idx, self.sp2_idx, 50256):
+                        continue
+                    else:
+                        tmp_list.append(tokenizer.decode(iid.item()))
+                sample_list.append(tmp_list)
+        
+        # sample choice
+        return sample(sample_list, 200)
 
     @torch.no_grad()
     def prediction_histogram(
@@ -1489,8 +1509,13 @@ if __name__ == "__main__":
 
     # added by DH
     if args.data_stat:
-        token_list = evaluation_model.data_statistic(test_dataloader, dm.tokenizer)
-        for item in token_list[:20]:
-            print(item)
-    
+        # token_list = evaluation_model.data_statistic(test_dataloader, dm.tokenizer)
+        # for item in token_list[:20]:
+        #     print(item)
+        samples = evaluation_model.sample_data(test_dataloader, dm.tokenizer)
+        # [[], [], ..., []]
+        with open(join(savepath, f"sample_{args.datasets}.txt" ), mode='w') as f:
+            for sample in samples:
+                f.write("".join(sample))
+
     #ans = input("end?")
