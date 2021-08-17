@@ -892,11 +892,10 @@ class TurnGPTEval(pl.LightningModule):
 
         return sorted(token_dict.items(), key=lambda x:x[1], reverse=True)
 
-    def sample_data(self, dataloader, tokenizer):
+    def sample_data(self, dataloader, tokenizer, v=400):
         from random import sample
 
         sample_list = []
-        limit = 200
         for batch in tqdm(dataloader, desc="Sampling"):
             input_ids, speaker_ids = batch[0], batch[1]
             # input_ids: [[...], [...]] shape[0]=batch_size, shape[1]=chunck_size
@@ -910,7 +909,7 @@ class TurnGPTEval(pl.LightningModule):
                 sample_list.append(tmp_list)
         
         # sample choice
-        return sample(sample_list, 200)
+        return sample(sample_list, min(v, len(sample_list)))
 
     @torch.no_grad()
     def prediction_histogram(
@@ -1514,7 +1513,7 @@ if __name__ == "__main__":
         #     print(item)
         samples = evaluation_model.sample_data(test_dataloader, dm.tokenizer)
         # [[], [], ..., []]
-        with open(join(savepath, f"sample_{args.datasets}.txt" ), mode='w') as f:
+        with open(join(savepath, f"sample_{args.datasets[0]}.txt" ), mode='w') as f:
             for sample in samples:
                 f.write("".join(sample))
 
