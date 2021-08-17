@@ -871,7 +871,19 @@ class TurnGPTEval(pl.LightningModule):
     def data_statistic(self, dataloader):
         id_dict = {}
         for batch in tqdm(dataloader, desc="Statistic"):
-            pass
+            input_ids, speaker_ids = batch[0], batch[1]
+            # input_ids: [[...], [...]] shape[0]=batch_size, shape[1]=chunck_size
+            for bat_input in input_ids:
+                for iid in bat_input:
+                    if iid in (self.sp1_idx, self.sp2_idx, 50256):
+                        continue
+                    else:
+                        try:
+                            id_dict[iid] += 1
+                        except:
+                            id_dict[iid] = 1
+                    
+        return id_dict
 
     @torch.no_grad()
     def prediction_histogram(
@@ -1289,34 +1301,48 @@ if __name__ == "__main__":
         #     " tomorrow",
         #     "",
         # ]
-        turns = [
-            " can i help you",
-            " i want that brown dog to go away",
-            "",
+        turns_list = [
+            [
+                " can i help you",
+                " i want that brown dog to go away",
+                "",
+            ],
+            [
+                " can i help you",
+                " i want to have that brown dog go away",
+                "",
+            ],
+            [
+                " can i help you",
+                " i want to let that brown dog go away",
+                "",
+            ],
         ]
-        input_ids, speaker_ids = turns_to_turngpt_tensors(
-            turns, dm.tokenizer, explicit_turn_shift=True
-        )
-        prediction = evaluation_model.prediction_histogram(
-            input_ids,
-            speaker_ids,
-            dm.tokenizer,
-            n_samples=n_samples,
-            batch_size=batch_size,
-            horizon=horizon,
-            start_after_first_turn=False,
-        )
-        for i, sw in enumerate(prediction["start_words"]):
-            print(sw, prediction["samples"][i])
-        
-        fig, ax = Plots.prediction_histograms(
-            prediction["prediction_distribution"],
-            prediction["start_words"],
-            prediction["samples"],
-            horizon=horizon,
-            plot=args.plot,
-        )
-        fig.savefig(join(savepath, f"pred_hist.png"))
+        for i, turns in enumerate(turns_list):
+            input_ids, speaker_ids = turns_to_turngpt_tensors(
+                turns, dm.tokenizer, explicit_turn_shift=True
+            )
+            prediction = evaluation_model.prediction_histogram(
+                input_ids,
+                speaker_ids,
+                dm.tokenizer,
+                n_samples=n_samples,
+                batch_size=batch_size,
+                horizon=horizon,
+                start_after_first_turn=False,
+            )
+            print("-"*20)
+            for i, sw in enumerate(prediction["start_words"]):
+                print(sw, prediction["samples"][i])
+            
+            fig, ax = Plots.prediction_histograms(
+                prediction["prediction_distribution"],
+                prediction["start_words"],
+                prediction["samples"],
+                horizon=horizon,
+                plot=args.plot,
+            )
+            fig.savefig(join(savepath, f"pred_hist{i}.png"))
 
 
     # DH NOTE: IG calculation is only available for pretrained model (not for mini).
