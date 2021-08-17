@@ -868,6 +868,11 @@ class TurnGPTEval(pl.LightningModule):
         out = self.trp(input_ids.to(self.device), speaker_ids.to(self.device))
         return out["trp"]
 
+    def data_statistic(self, dataloader):
+        id_dict = {}
+        for batch in tqdm(dataloader, desc="Statistic"):
+            pass
+
     @torch.no_grad()
     def prediction_histogram(
         self,
@@ -1285,8 +1290,8 @@ if __name__ == "__main__":
         #     "",
         # ]
         turns = [
-            " yesterday i met him in the park",
-            " he is so excited",
+            " can i help you",
+            " i want that brown dog to go away",
             "",
         ]
         input_ids, speaker_ids = turns_to_turngpt_tensors(
@@ -1301,8 +1306,9 @@ if __name__ == "__main__":
             horizon=horizon,
             start_after_first_turn=False,
         )
-        print(prediction["start_words"])
-        print(prediction["samples"])
+        for i, sw in enumerate(prediction["start_words"]):
+            print(sw, prediction["samples"][i])
+        
         fig, ax = Plots.prediction_histograms(
             prediction["prediction_distribution"],
             prediction["start_words"],
