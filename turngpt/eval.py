@@ -892,7 +892,7 @@ class TurnGPTEval(pl.LightningModule):
 
         return sorted(token_dict.items(), key=lambda x:x[1], reverse=True)
 
-    def sample_data(self, dataloader, tokenizer, v=400):
+    def sample_data(self, dataloader, tokenizer, v=500):
         from random import sample
 
         sample_list = []
