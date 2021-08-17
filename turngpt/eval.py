@@ -52,7 +52,7 @@ def load():
     parser.add_argument(
         "--split",
         type=str,
-        default="train",  # val, test
+        default="train",  # val, test, or all
     )
     temp_args, _ = parser.parse_known_args()
 
@@ -1490,7 +1490,7 @@ if __name__ == "__main__":
     # added by DH
     if args.data_stat:
         token_list = evaluation_model.data_statistic(test_dataloader, dm.tokenizer)
-        for item in token_list[:10]:
+        for item in token_list[:20]:
             print(item)
     
     #ans = input("end?")
