@@ -1202,7 +1202,7 @@ class Plots:
     @staticmethod
     def prediction_histograms(hist, start_words, samples, horizon, plot=False):
         max_text_len = 50
-        sampledict = {"fontsize": 12, "fontweight": "bold"}
+        sampledict = {"fontsize": 12, }#"fontweight": "bold"}
         fig, ax = plt.subplots(len(hist), 1, sharex=True, figsize=(7, 10))
         for i, (word, pred_dist, sample) in enumerate(zip(start_words, hist, samples)):
             sample_text = " ".join(list(sample))
@@ -1214,7 +1214,7 @@ class Plots:
             ax[i].set_ylabel(
                 word,
                 rotation=0,
-                fontweight="bold",
+                #fontweight="bold",
                 fontsize=12,
                 labelpad=2,
                 horizontalalignment="right",
@@ -1304,7 +1304,7 @@ if __name__ == "__main__":
 
     if args.prediction_hist:
         n_samples = 1000
-        horizon = 41
+        horizon = 50
         batch_size = 40
         # a space at the beginning of a sentence: https://huggingface.co/transformers/v3.3.1/model_doc/gpt2.html#transformers.GPT2Tokenizer
         # turns = [
@@ -1344,8 +1344,8 @@ if __name__ == "__main__":
                 start_after_first_turn=False,
             )
             print("-"*20)
-            for i, sw in enumerate(prediction["start_words"]):
-                print(sw, prediction["samples"][i])
+            for j, sw in enumerate(prediction["start_words"]):
+                print(sw, prediction["samples"][j])
             
             fig, ax = Plots.prediction_histograms(
                 prediction["prediction_distribution"],
