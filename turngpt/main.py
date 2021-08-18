@@ -196,4 +196,6 @@ if __name__ == "__main__":
     print(args.save_dir)
     print()
 
+    print(args)
+    input("____")
     main(args)
